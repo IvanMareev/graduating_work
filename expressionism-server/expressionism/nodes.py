@@ -1,4 +1,5 @@
 from __future__ import annotations
+import random
 from sympy import Expr, evaluate, nsimplify, parse_expr, expand, Add, Mul, Pow, Limit
 from typing import TYPE_CHECKING
 from icecream import ic
@@ -182,6 +183,24 @@ class LimitNode(Node):
         return Limit(sourceExpr, limitVariable, limitTarget, limitDir)
 
 
+class BranchNode(Node):
+    def __init__(self, id: str, data: dict):
+        super().__init__(id, "branch", data)
+
+    def calc(self, graph: ExpressionGraph) -> Expr:
+        branches = self.data["branches"]
+        random_branch_index = ic(random.randint(0, len(branches) - 1))
+
+        expr_node = graph.get_linked_node(self.id, f"branch-{random_branch_index}")
+        expr: Expr = (
+            parse_expr(branches[random_branch_index], evaluate=False)
+            if expr_node is None
+            else expr_node.calc(graph)
+        )
+
+        return expr
+
+
 def create_node_from_type(node_type: str, id: str, data: dict) -> Node:
     if node_type == "expression":
         return ExpressionNode(id, data)
@@ -197,6 +216,8 @@ def create_node_from_type(node_type: str, id: str, data: dict) -> Node:
         return PowNode(id, data)
     elif node_type == "limit":
         return LimitNode(id, data)
+    elif node_type == "branch":
+        return BranchNode(id, data)
     elif node_type == "result":
         return ResultNode(id, data)
     else:

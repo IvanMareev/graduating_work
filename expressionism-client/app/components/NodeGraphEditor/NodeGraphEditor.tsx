@@ -63,6 +63,13 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     const [contextNode, setContextNode] = useState<Node | null>(null);
     const [contextPanePosition, setContextPanePosition] = useState<XYPosition>({ x: 0, y: 0 });
 
+    const createNode = (type: string, data: any) => ({
+        id: nanoid(),
+        type,
+        position: contextPanePosition,
+        data,
+    });
+
     const paneContextItems = useMemo(
         () => [
             {
@@ -141,7 +148,17 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
             },
             {
                 label: "Узлы условий",
-                items: [{ label: "Ветвление" }, { label: "Выбор" }, { label: "Ограничение" }],
+                items: [
+                    {
+                        label: "Ветвление",
+                        command: () => {
+                            const newNode = createNode("branch", { branches: ["", ""] });
+                            setNodes((nds) => nds.concat(newNode));
+                        },
+                    },
+                    { label: "Выбор" },
+                    { label: "Ограничение" },
+                ],
             },
             {
                 label: "Узлы функций",

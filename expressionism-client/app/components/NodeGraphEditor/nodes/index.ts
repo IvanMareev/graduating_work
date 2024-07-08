@@ -1,3 +1,4 @@
+import BranchNode from "./BranchNode";
 import ExpressionNode from "./ExpressionNode";
 import InversionNode from "./InversionNode";
 import JoinNode from "./JoinNode";
@@ -16,9 +17,11 @@ const nodeTypes = {
     simplification: SimplificationNode,
     pow: PowNode,
     limit: LimitNode,
+    branch: BranchNode,
 };
 
 export {
+    BranchNode,
     ExpressionNode,
     InversionNode,
     JoinNode,
