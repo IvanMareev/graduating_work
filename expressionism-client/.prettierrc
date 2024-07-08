@@ -1,0 +1,7 @@
+{
+  "tabWidth": 4,
+  "useTabs": false,
+  "semi": true,
+  "printWidth": 100,
+  "plugins": ["@pandabox/prettier-plugin", "prettier-plugin-organize-imports"]
+}

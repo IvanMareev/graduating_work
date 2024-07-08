@@ -1,0 +1,6 @@
+Next.js
+Panda CSS
+Lucide React
+SWR
+Zod - for data validation
+Ky.js
