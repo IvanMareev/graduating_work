@@ -429,7 +429,7 @@ def new_generation(task_id):
 
     variants_count = request.json.get("variants_count", 1)
     generators = [tg.generator for tg in task.generators]
-    gen_results = ic(gs.generate(variants_count, generators))
+    gen_results = gs.generate(variants_count, generators)
     results_as_json = json.dumps(gen_results)
 
     result = GenerationResult(

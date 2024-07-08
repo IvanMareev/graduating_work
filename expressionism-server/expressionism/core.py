@@ -63,6 +63,4 @@ class Expressionism:
             for c in coefficients:
                 concrete_expression = concrete_expression.subs(c.symbol, c.get_value())
 
-        pprint(concrete_expression)
-
         return concrete_expression

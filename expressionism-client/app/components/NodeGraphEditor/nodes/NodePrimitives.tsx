@@ -150,6 +150,21 @@ const baseNodeStyles = sva({
                     bgColor: "green.8",
                 },
             },
+            violet: {
+                header: {
+                    bgColor: "violet.8",
+                },
+            },
+            red: {
+                header: {
+                    bgColor: "red.8",
+                },
+            },
+            yellow: {
+                header: {
+                    bgColor: "yellow.8",
+                },
+            },
         },
     },
     defaultVariants: {
@@ -160,7 +175,7 @@ const baseNodeStyles = sva({
 
 type BaseNodeProps = NodeProps & {
     title: string;
-    color?: "blue" | "orange" | "green" | undefined;
+    color?: "blue" | "orange" | "green" | "violet" | "red" | "yellow" | undefined;
     className?: string;
     children?: React.ReactNode;
 };

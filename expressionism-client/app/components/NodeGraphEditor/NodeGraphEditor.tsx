@@ -3,7 +3,15 @@ import { fetcherGet } from "@/app/api/fetchers";
 import { Generator } from "@/app/types/model";
 import { nanoid } from "nanoid/non-secure";
 import { ContextMenu } from "primereact/contextmenu";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+    forwardRef,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import ReactFlow, {
     addEdge,
     Background,
@@ -12,6 +20,7 @@ import ReactFlow, {
     Controls,
     Edge,
     getConnectedEdges,
+    getOutgoers,
     Node,
     NodeChange,
     ReactFlowInstance,
@@ -47,62 +56,142 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     const paneContextMenu = useRef<ContextMenu>(null);
     const nodeContextMenu = useRef<ContextMenu>(null);
 
-    const { screenToFlowPosition, setViewport, getNode } = useReactFlow();
+    const { screenToFlowPosition, setViewport, getNode, getNodes, getEdges } = useReactFlow();
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [contextNode, setContextNode] = useState<Node | null>(null);
     const [contextPanePosition, setContextPanePosition] = useState<XYPosition>({ x: 0, y: 0 });
 
-    const paneContextItems = [
-        {
-            label: "Основные узлы",
-            items: [
-                {
-                    label: "Выражение",
-                    command: () => {
-                        const newNode: Node = {
-                            id: nanoid(),
-                            type: "expression",
-                            position: contextPanePosition,
-                            data: { value: "" },
-                        };
+    const paneContextItems = useMemo(
+        () => [
+            {
+                label: "Основные узлы",
+                items: [
+                    {
+                        label: "Выражение",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "expression",
+                                position: contextPanePosition,
+                                data: { value: "" },
+                            };
 
-                        setNodes((nds) => nds.concat(newNode));
+                            setNodes((nds) => nds.concat(newNode));
+                        },
                     },
-                },
-                {
-                    label: "Соединение",
-                    command: () => {
-                        const newNode: Node = {
-                            id: nanoid(),
-                            type: "join",
-                            position: contextPanePosition,
-                            data: { operator: "+" },
-                        };
+                    {
+                        label: "Соединение",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "join",
+                                position: contextPanePosition,
+                                data: { operator: "+" },
+                            };
 
-                        setNodes((nds) => nds.concat(newNode));
+                            setNodes((nds) => nds.concat(newNode));
+                        },
                     },
-                },
-                {
-                    label: "Подстановка",
-                    command: () => {
-                        const newNode: Node = {
-                            id: nanoid(),
-                            type: "substitution",
-                            position: contextPanePosition,
-                            data: { variable: "x" },
-                        };
+                    {
+                        label: "Подстановка",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "substitution",
+                                position: contextPanePosition,
+                                data: {
+                                    variable: "x",
+                                    sourceExpression: "",
+                                    substituteExpression: "",
+                                },
+                            };
 
-                        setNodes((nds) => nds.concat(newNode));
+                            setNodes((nds) => nds.concat(newNode));
+                        },
                     },
-                },
-            ],
-        },
-        { label: "Узлы условий" },
-        { label: "Узлы функций" },
-        { label: "Крупные операторы" },
-    ];
+                    {
+                        label: "Инверсия",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "inversion",
+                                position: contextPanePosition,
+                                data: {},
+                            };
+
+                            setNodes((nds) => nds.concat(newNode));
+                        },
+                    },
+                    {
+                        label: "Упрощение",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "simplification",
+                                position: contextPanePosition,
+                                data: {},
+                            };
+
+                            setNodes((nds) => nds.concat(newNode));
+                        },
+                    },
+                ],
+            },
+            {
+                label: "Узлы условий",
+                items: [{ label: "Ветвление" }, { label: "Выбор" }, { label: "Ограничение" }],
+            },
+            {
+                label: "Узлы функций",
+                items: [
+                    { label: "Функция" },
+                    { label: "Корень" },
+                    { label: "Логарифм" },
+                    {
+                        label: "Степень",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "pow",
+                                position: contextPanePosition,
+                                data: { sourceExpression: "x", degree: "2" },
+                            };
+
+                            setNodes((nds) => nds.concat(newNode));
+                        },
+                    },
+                ],
+            },
+            {
+                label: "Крупные операторы",
+                items: [
+                    {
+                        label: "Предел",
+                        command: () => {
+                            const newNode: Node = {
+                                id: nanoid(),
+                                type: "limit",
+                                position: contextPanePosition,
+                                data: {
+                                    sourceExpression: "x",
+                                    limitDir: "+-",
+                                    limitTarget: "2",
+                                    limitVariable: "k",
+                                },
+                            };
+
+                            setNodes((nds) => nds.concat(newNode));
+                        },
+                    },
+                    { label: "Интеграл" },
+                    { label: "Определенный интеграл" },
+                ],
+            },
+        ],
+        [contextPanePosition, setNodes],
+    );
 
     const nodeContextItems = [
         {
@@ -169,6 +258,30 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
             setEdges(initialEdges);
         }
     }, [data, setEdges, setNodes, setViewport]);
+
+    const isValidConnection = useCallback(
+        (connection) => {
+            // we are using getNodes and getEdges helpers here
+            // to make sure we create isValidConnection function only once
+            const nodes = getNodes();
+            const edges = getEdges();
+            const target = nodes.find((node) => node.id === connection.target);
+            const hasCycle = (node, visited = new Set()) => {
+                if (visited.has(node.id)) return false;
+
+                visited.add(node.id);
+
+                for (const outgoer of getOutgoers(node, nodes, edges)) {
+                    if (outgoer.id === connection.source) return true;
+                    if (hasCycle(outgoer, visited)) return true;
+                }
+            };
+
+            if (target.id === connection.source) return false;
+            return !hasCycle(target);
+        },
+        [getNodes, getEdges],
+    );
 
     const onConnect = useCallback(
         (params: Edge | Connection) => {
@@ -288,6 +401,7 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
                 edges={edges}
                 nodeTypes={nodeTypes}
                 onConnect={onConnect}
+                isValidConnection={isValidConnection}
                 onNodesChange={handleNodesChange}
                 onEdgesChange={onEdgesChange}
                 onEdgeUpdateStart={onEdgeUpdateStart}

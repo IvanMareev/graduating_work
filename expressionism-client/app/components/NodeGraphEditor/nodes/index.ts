@@ -1,6 +1,10 @@
 import ExpressionNode from "./ExpressionNode";
+import InversionNode from "./InversionNode";
 import JoinNode from "./JoinNode";
+import LimitNode from "./LimitNode";
+import PowNode from "./PowNode";
 import ResultNode from "./ResultNode";
+import SimplificationNode from "./SimplificationNode";
 import SubstitutionNode from "./SubstitutionNode";
 
 const nodeTypes = {
@@ -8,6 +12,20 @@ const nodeTypes = {
     expression: ExpressionNode,
     join: JoinNode,
     substitution: SubstitutionNode,
+    inversion: InversionNode,
+    simplification: SimplificationNode,
+    pow: PowNode,
+    limit: LimitNode,
 };
 
-export { ExpressionNode, JoinNode, ResultNode, SubstitutionNode, nodeTypes };
+export {
+    ExpressionNode,
+    InversionNode,
+    JoinNode,
+    LimitNode,
+    PowNode,
+    ResultNode,
+    SimplificationNode,
+    SubstitutionNode,
+    nodeTypes,
+};
