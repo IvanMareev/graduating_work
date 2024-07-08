@@ -1,16 +1,18 @@
 "use client";
 
-import { IconButton } from "@/app/components/ui/icon-button";
 import { fetcherDelete, fetcherGet, fetcherPatch, fetcherPost } from "@/app/api/fetchers";
+import { IconButton } from "@/app/components/ui/icon-button";
 import { CourseVariant } from "@/app/types/model";
 import { css, sva } from "@/styled-system/css";
 import { Box } from "@/styled-system/jsx";
 import { ChevronLeft, ChevronRight, CircleAlert, PlusIcon, Trash2 } from "lucide-react";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { observer } from "mobx-react-lite";
+import { confirmDialog } from "primereact/confirmdialog";
 import { ContextMenu } from "primereact/contextmenu";
 import React from "react";
-import useSWR from "swr";
 import { Tooltip } from "react-tooltip";
+import useSWR from "swr";
+import { CourseTreeState } from "../NewDisciplineTree/DisciplineTreeView";
 import { CourseVariantTab } from "./CourseVariantTab";
 
 const courseVariantsListStyles = sva({
@@ -37,10 +39,12 @@ const courseVariantsListStyles = sva({
 const styles = courseVariantsListStyles();
 
 type CourseVariantListProps = {
-    onVariantChanged?: (variantId: number) => void;
+    courseTreeState: CourseTreeState;
 };
 
-const CourseVariantList: React.FC<CourseVariantListProps> = ({ onVariantChanged }) => {
+const CourseVariantList: React.FC<CourseVariantListProps> = observer(function CourseVariantList({
+    courseTreeState,
+}) {
     const { data, isValidating, mutate } = useSWR<CourseVariant[]>(
         "disciplines/1/course_variants",
         fetcherGet,
@@ -81,9 +85,9 @@ const CourseVariantList: React.FC<CourseVariantListProps> = ({ onVariantChanged 
 
             setSelectedItem(itemIndex);
             scrollTo(data[itemIndex].id);
-            onVariantChanged?.(data[itemIndex].id);
+            courseTreeState.setCourseVariant(data[itemIndex].id);
         },
-        [data, onVariantChanged, scrollTo],
+        [courseTreeState, data, scrollTo],
     );
 
     const newCourseVariant = async (e: any) => {
@@ -114,6 +118,17 @@ const CourseVariantList: React.FC<CourseVariantListProps> = ({ onVariantChanged 
             showConfirmDeleteCourseVariant();
         }
     };
+
+    React.useEffect(() => {
+        if (data && courseTreeState.courseVariant) {
+            const selectedItemIndex = data.findIndex(
+                (variant) => variant.id === courseTreeState.courseVariant,
+            );
+            if (selectedItemIndex !== -1) {
+                selectItem(selectedItemIndex);
+            }
+        }
+    }, [data, courseTreeState.courseVariant, selectItem]);
 
     React.useEffect(() => {
         if (shouldScrollToLast && !isValidating) {
@@ -207,6 +222,6 @@ const CourseVariantList: React.FC<CourseVariantListProps> = ({ onVariantChanged 
             />
         </>
     );
-};
+});
 
 export default CourseVariantList;

@@ -4,6 +4,8 @@ import { apiActions } from "@/app/api/actions";
 import { fetcherGet } from "@/app/api/fetchers";
 import { Section } from "@/app/types/model";
 import { Box } from "@/styled-system/jsx";
+import { makeAutoObservable } from "mobx";
+import { observer } from "mobx-react-lite";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -23,7 +25,36 @@ import mapDataToTree, { TreeItemData, TreeItemType } from "./mapData";
 import disciplineTreeRenderers from "./renderers";
 import { disciplineTreeViewStyles } from "./styles";
 
-const DisciplineTreeView = () => {
+export class CourseTreeState {
+    expandedItems: TreeItemIndex[] = [];
+    courseVariant: number = 1;
+    selectedTopic: string = "right_topic-1";
+
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setExpandedItems(items: TreeItemIndex[]) {
+        this.expandedItems = items;
+    }
+
+    setCourseVariant(variant: number) {
+        this.courseVariant = variant;
+    }
+
+    setSelectedTopic(topic: string) {
+        this.selectedTopic = topic;
+    }
+}
+
+var courseTreeState = new CourseTreeState();
+export { courseTreeState };
+
+const DisciplineTreeView = observer(function DisciplineTreeView({
+    courseTreeState,
+}: {
+    courseTreeState: CourseTreeState;
+}) {
     const { data } = useSWR<Section[]>("disciplines/1/sections", fetcherGet, {
         keepPreviousData: true,
         revalidateOnFocus: false,
@@ -32,10 +63,7 @@ const DisciplineTreeView = () => {
     const router = useRouter();
 
     const environment = useRef<TreeEnvironmentRef>(null);
-    const [courseVariant, setCourseVariant] = useState<number>(1);
-    const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>(["section-1"]);
     const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([]);
-    const [selectedTopic, setSelectedTopic] = useState<string>("right_topic-1");
     const [initialized, setInitialized] = useState<boolean>(false);
     const [taskId, setTaskId] = useState<number | null>(null);
 
@@ -51,49 +79,64 @@ const DisciplineTreeView = () => {
                 }
             });
 
-            // Select first topic by default
-            setSelectedTopic(`right_topic-${data[0].topics[0].id}`);
-
-            setExpandedItems(initialExpandedItems);
+            if (courseTreeState.expandedItems.length === 0) {
+                courseTreeState.setExpandedItems(initialExpandedItems);
+                // Select first topic by default
+                courseTreeState.setSelectedTopic(`right_topic-${data[0].topics[0].id}`);
+            }
             setInitialized(true);
         }
-    }, [data, initialized]);
+    }, [courseTreeState, data, initialized]);
 
     const items = useMemo(() => {
         if (data === undefined) {
             return {};
         }
 
-        const mappedData = mapDataToTree(data, courseVariant, router, setTaskId);
+        const mappedData = mapDataToTree(data, courseTreeState.courseVariant, router, setTaskId);
 
         return mappedData;
-    }, [data, courseVariant, router]);
+    }, [courseTreeState.courseVariant, data, router]);
 
     const handleExpandItem = (item: TreeItem<TreeItemData>) => {
         const itemIndex = item.index.toString();
         const t = itemIndex.split("-")[0];
 
-        setExpandedItems([
-            ...expandedItems.filter((expandedItem) => t !== expandedItem.toString().split("-")[0]),
+        courseTreeState.setExpandedItems([
+            ...courseTreeState.expandedItems.filter(
+                (expandedItem) => t !== expandedItem.toString().split("-")[0],
+            ),
             item.index,
         ]);
 
         if (itemIndex.startsWith("topic")) {
             const topicId = itemIndex.split("-")[1];
 
-            setSelectedTopic("right_topic-" + topicId);
+            courseTreeState.setSelectedTopic("right_topic-" + topicId);
         } else if (itemIndex.startsWith("section")) {
             const sectionId = itemIndex.split("-")[1];
 
-            const relatedTopic = expandedItems.find((item) =>
+            const relatedTopic = courseTreeState.expandedItems.find((item) =>
                 item.toString().startsWith("topic_" + sectionId),
             );
 
             if (relatedTopic === undefined) {
-                throw new Error("Something went wrong!");
+                const section = data?.find((s) => s.id === Number(sectionId));
+                if (section == null) {
+                    throw new Error(`Section with id ${sectionId} not found!`);
+                }
+                courseTreeState.setExpandedItems(
+                    courseTreeState.expandedItems.concat(
+                        `topic_${section.id}-${section.topics[0].id}`,
+                    ),
+                );
+                courseTreeState.setSelectedTopic("right_topic-" + section.topics[0].id);
+                return;
             }
 
-            setSelectedTopic("right_topic-" + relatedTopic.toString().split("-")[1]);
+            courseTreeState.setSelectedTopic(
+                "right_topic-" + relatedTopic.toString().split("-")[1],
+            );
         }
     };
 
@@ -104,11 +147,11 @@ const DisciplineTreeView = () => {
             ref={environment}
             viewState={{
                 ["course-structure-tree"]: {
-                    expandedItems: expandedItems,
+                    expandedItems: courseTreeState.expandedItems,
                     selectedItems: selectedItems,
                 },
                 ["control-materials-tree"]: {
-                    expandedItems: expandedItems,
+                    expandedItems: courseTreeState.expandedItems,
                     selectedItems: selectedItems,
                 },
             }}
@@ -125,22 +168,25 @@ const DisciplineTreeView = () => {
             // }}
             getItemTitle={(item) => item.data.title}
             items={items}
-            defaultInteractionMode={InteractionMode.ClickArrowToExpand}
+            defaultInteractionMode={InteractionMode.ClickItemToExpand}
             canDragAndDrop={true}
-            canReorderItems={true}
+            canReorderItems={false}
             canDropOnFolder={true}
             canDrag={(items) => {
                 return items.every((item) => item.data.itemType === TreeItemType.Generator);
             }}
-            canDropAt={(items, target) => {
-                return (
-                    (target.targetType === "item" &&
-                        environment.current?.items[target.targetItem].data.itemType ===
-                            TreeItemType.Task) ||
-                    (target.targetType === "between-items" &&
-                        environment.current?.items[target.parentItem].data.itemType ===
-                            TreeItemType.Task)
-                );
+            canDropAt={(itms, target) => {
+                const first =
+                    target.targetType === "item" &&
+                    environment.current?.items[target.targetItem].data.itemType ===
+                        TreeItemType.Task;
+
+                const second =
+                    target.targetType === "between-items" &&
+                    environment.current?.items[target.parentItem].data.itemType ===
+                        TreeItemType.Task;
+
+                return first || second;
             }}
             onDrop={(items, target) => {
                 let targetId = -1;
@@ -168,14 +214,13 @@ const DisciplineTreeView = () => {
                 <Box className={styles.column}>
                     <h3 className={styles.header}>Контрольно-измерительные материалы</h3>
                     <Block className={styles.content}>
-                        <Tree treeId={"control-materials-tree"} rootItem={selectedTopic} />
+                        <Tree
+                            treeId={"control-materials-tree"}
+                            rootItem={courseTreeState.selectedTopic}
+                        />
                     </Block>
                     <Block className={styles.courseVariants}>
-                        <CourseVariantList
-                            onVariantChanged={(value) => {
-                                setCourseVariant(value);
-                            }}
-                        />
+                        <CourseVariantList courseTreeState={courseTreeState} />
                     </Block>
                 </Box>
                 <Tooltip id="tree-node-button" />
@@ -193,6 +238,6 @@ const DisciplineTreeView = () => {
             />
         </ControlledTreeEnvironment>
     );
-};
+});
 
 export default DisciplineTreeView;

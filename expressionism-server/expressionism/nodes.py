@@ -1,6 +1,17 @@
 from __future__ import annotations
 import random
-from sympy import Expr, evaluate, nsimplify, parse_expr, expand, Add, Mul, Pow, Limit
+from sympy import (
+    Expr,
+    evaluate,
+    nsimplify,
+    parse_expr,
+    expand,
+    Add,
+    Mul,
+    Pow,
+    Limit,
+    simplify,
+)
 from typing import TYPE_CHECKING
 from icecream import ic
 
@@ -131,7 +142,7 @@ class SimplificationNode(Node):
 
         expr: Expr = expr_node.calc(graph)
 
-        return nsimplify(expand(expr))
+        return simplify(expr)
 
 
 class PowNode(Node):

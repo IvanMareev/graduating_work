@@ -1,5 +1,5 @@
 from enum import Enum
-from sympy import Expr, pprint, symbols, evaluate
+from sympy import Expr, pprint, symbols, evaluate, nsimplify, expand, simplify, collect
 
 from expressionism.graph import ExpressionGraph
 from icecream import ic
@@ -61,6 +61,17 @@ class Expressionism:
         concrete_expression = template
         with evaluate(False):
             for c in coefficients:
-                concrete_expression = concrete_expression.subs(c.symbol, c.get_value())
+                c_value = 0
+                attempt = 0
+                while c_value == 0:
+                    c_value = c.get_value()
+                    attempt += 1
+                    if attempt > 100:
+                        raise ValueError(f"Cannot generate value for coefficient {c}")
+                concrete_expression = concrete_expression.subs(c.symbol, c_value)
+        ic(concrete_expression.atoms)
+        if ic(len(concrete_expression.free_symbols)) > 0:
+            ic("Expression simplified")
+            concrete_expression = concrete_expression.simplify().evalf()
 
         return concrete_expression

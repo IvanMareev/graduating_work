@@ -295,7 +295,7 @@ function mapDataToTree(
                                 tooltip:
                                     task.generators.length !== 0
                                         ? "Сгенерировать"
-                                        : "Добавьте генераторы в КИМ",
+                                        : "Сначала добавьте генераторы в КИМ",
                                 onClick: (context, e) => {
                                     confirmPopup({
                                         group: "generation",

@@ -33,23 +33,23 @@ const disciplineTreeRenderers: TreeRenderProps<TreeItemData> = {
 
     renderRenameInput: RenameInput,
 
-    renderDragBetweenLine: ({ draggingPosition, lineProps }) => (
-        <div
-            {...lineProps}
-            style={{
-                top:
-                    draggingPosition.targetType === "between-items" &&
-                    draggingPosition.linePosition === "top"
-                        ? "0px"
-                        : draggingPosition.targetType === "between-items" &&
-                            draggingPosition.linePosition === "bottom"
-                          ? "-4px"
-                          : "-2px",
-                left: `${(draggingPosition.depth + 1) * 28}px`,
-            }}
-            className={styles.betweenLine}
-        />
-    ),
+    // renderDragBetweenLine: ({ draggingPosition, lineProps }) => (
+    //     <div
+    //         {...lineProps}
+    //         style={{
+    //             top:
+    //                 draggingPosition.targetType === "between-items" &&
+    //                 draggingPosition.linePosition === "top"
+    //                     ? "0px"
+    //                     : draggingPosition.targetType === "between-items" &&
+    //                         draggingPosition.linePosition === "bottom"
+    //                       ? "-4px"
+    //                       : "-2px",
+    //             left: `${(draggingPosition.depth + 1) * 28}px`,
+    //         }}
+    //         className={styles.betweenLine}
+    //     />
+    // ),
 
     renderItem: (props) => {
         const isAction = !!props.item.data.isAction;

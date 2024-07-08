@@ -86,11 +86,14 @@ class Generator(db.Model):
     topic_id = mapped_column(db.Integer, db.ForeignKey("topic.id"), nullable=False)
     name = mapped_column(db.String(120), unique=False, nullable=False)
     topic = db.relationship("Topic", back_populates="generators")
-    task_text = mapped_column(db.String(120), unique=False)
+    task_text = mapped_column(db.String(120), unique=False, default="")
     variables = mapped_column(db.Text, nullable=True)
     coefficients = mapped_column(db.Text, nullable=True)
     restricts = mapped_column(db.Text, nullable=True)
     content = mapped_column(db.Text, nullable=True)
+    task_generators = db.relationship(
+        "TaskGenerator", back_populates="generator", cascade="all,delete"
+    )
 
     def to_json(self):
         return {
@@ -147,7 +150,7 @@ class Task(db.Model):
     course_variant = db.relationship("CourseVariant")
     topic = db.relationship("Topic", back_populates="tasks")
     generators: Mapped[list[Generator]] = db.relationship(
-        "TaskGenerator", back_populates="task"
+        "TaskGenerator", back_populates="task", cascade="all,delete"
     )
     results = db.relationship("GenerationResult", cascade="all,delete")
 

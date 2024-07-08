@@ -35,7 +35,11 @@ import ReactFlow, {
 import useSWR from "swr";
 import { nodeTypes } from "./nodes";
 
-const initialNodes: Node[] = [{ id: nanoid(), type: "result", position: { x: 0, y: 0 }, data: {} }];
+const getInitialNodes = () => {
+    return [
+        { id: nanoid(), type: "result", position: { x: 0, y: 0 }, data: { taskType: "решить" } },
+    ];
+};
 
 const initialEdges: Edge[] = [];
 
@@ -267,11 +271,11 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
 
         if (flow) {
             const { x = 0, y = 0, zoom = 1 } = flow.viewport;
-            setNodes(flow.nodes || initialNodes);
+            setNodes(flow.nodes || getInitialNodes());
             setEdges(flow.edges || initialEdges);
             setViewport({ x, y, zoom });
         } else {
-            setNodes(initialNodes);
+            setNodes(getInitialNodes());
             setEdges(initialEdges);
         }
     }, [data, setEdges, setNodes, setViewport]);

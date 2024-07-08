@@ -486,6 +486,44 @@ def get_variant_document(variant_id):
     return send_file(file_path + ".pdf")
 
 
+@app.get("/variants/<int:variant_id>/answers")
+def get_variant_answers_document(variant_id):
+    variant = db.session.get(GenerationVariant, variant_id)
+
+    if not variant:
+        return server_msg("Вариант не найден", 204)
+
+    result = db.session.get(GenerationResult, variant.result_id)
+
+    file_name = f"variant_answers_{result.id}_{variant_id}"
+    file_path = f"{app.static_folder}\\{file_name}"
+
+    if os.path.isfile(file_path + ".pdf"):
+        return send_from_directory(app.static_folder, file_name + ".pdf")
+
+    variant_index = next(
+        (
+            index
+            for index, variant in enumerate(result.variants)
+            if variant.id == variant_id
+        ),
+        None,
+    )
+
+    if variant_index is None:
+        return server_msg("Вариант не найден", 404)
+
+    GeneratorSystem.create_variant_answers_pdf(
+        json.loads(result.results), variant_index, file_path
+    )
+
+    # ic(os.path.isfile(file_path + ".pdf"))
+    # time.sleep(1)
+
+    # return send_from_directory(app.static_folder, file_name)
+    return send_file(file_path + ".pdf")
+
+
 @app.get("/results/<int:result_id>/export")
 def export_result(result_id):
     result = db.session.get(GenerationResult, result_id)

@@ -1,10 +1,11 @@
-import { Box, Container } from "@/styled-system/jsx";
-import React from "react";
-import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import Header from "@/app/components/Header";
+import { Box, Container } from "@/styled-system/jsx";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { ConfirmPopup } from "primereact/confirmpopup";
-import DisciplineTreeView from "./components/NewDisciplineTree/DisciplineTreeView";
+import DisciplineTreeView, {
+    courseTreeState,
+} from "./components/NewDisciplineTree/DisciplineTreeView";
 
 export default function Home() {
     return (
@@ -20,7 +21,7 @@ export default function Home() {
             >
                 <Header />
                 <Box boxSizing="border-box" flex="1 0" minH="400px">
-                    <DisciplineTreeView />
+                    <DisciplineTreeView courseTreeState={courseTreeState} />
                 </Box>
                 <Footer />
             </Container>

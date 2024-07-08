@@ -4,7 +4,7 @@ import { NodeProps, useReactFlow, useUpdateNodeInternals } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 
-const BranchNode = (props: NodeProps) => {
+const ChoiceNode = (props: NodeProps) => {
     const { getNodes, setNodes } = useReactFlow();
     const updateNodeInternals = useUpdateNodeInternals();
     const [branches, setBranches] = useState(["", ""]);
@@ -29,9 +29,9 @@ const BranchNode = (props: NodeProps) => {
     }, [props.id, updateNodeInternals, branches]);
 
     return (
-        <BaseNode title="Ветвление" color="lime" {...props}>
+        <BaseNode title="Выбор" color="lime" {...props}>
             <OutputHandle handleId="out-1" label="Результат"></OutputHandle>
-            <OutputHandle handleId="selected-index" label="Индекс выбранного"></OutputHandle>
+            <InputHandle handleId="index" label="Индекс выбранного"></InputHandle>
             {branches.map((branch, i) => (
                 <InputHandle key={i} handleId={`branch-${i}`} label={`Выражение ${i + 1}`}>
                     <InputField
@@ -44,7 +44,7 @@ const BranchNode = (props: NodeProps) => {
                             setBranchesWrapper(newBranches);
                         }}
                     />
-                    <Button
+                    {/* <Button
                         icon="pi pi-times"
                         size="small"
                         text
@@ -54,10 +54,10 @@ const BranchNode = (props: NodeProps) => {
                         onClick={() => {
                             setBranchesWrapper(branches.filter((_, j) => j !== i));
                         }}
-                    />
+                    /> */}
                 </InputHandle>
             ))}
-
+{/* 
             <Button
                 icon="pi pi-plus"
                 label="Новая ветвь"
@@ -68,9 +68,9 @@ const BranchNode = (props: NodeProps) => {
                 onClick={(e) => {
                     setBranchesWrapper(branches.concat(""));
                 }}
-            />
+            /> */}
         </BaseNode>
     );
 };
 
-export default BranchNode;
+export default ChoiceNode;

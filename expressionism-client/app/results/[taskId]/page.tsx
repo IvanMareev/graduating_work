@@ -103,13 +103,14 @@ const pageStyles = sva({
     },
 });
 
+const selectButtonOptions = ["Без ответов", "С ответами"];
+
 export default function ResultsPage({ params }: { params: { taskId: number } }) {
     const { data } = useSWR<Task>(`tasks/${params.taskId}`, fetcherGet, {
         keepPreviousData: true,
         revalidateOnFocus: false,
     });
 
-    const selectButtonOptions = ["Без ответов", "С ответами"];
     const [selectButtonValue, setSelectButtonValue] = useState(selectButtonOptions[0]);
     const [genResult, setGenResult] = useState<GenerationResult | null>(null);
     const [variant, setVariant] = useState<Variant | null>(null);
@@ -119,10 +120,15 @@ export default function ResultsPage({ params }: { params: { taskId: number } }) 
         setGenResult(result);
     }, []);
 
-    const handleVariantSelect = useCallback((variant: Variant | null) => {
-        setVariant(variant);
-        setPreviewFileUrl(`http://127.0.0.1:5000/variants/${variant.id}/document`);
-    }, []);
+    const handleVariantSelect = useCallback(
+        (variant: Variant | null) => {
+            setVariant(variant);
+            setPreviewFileUrl(
+                `http://127.0.0.1:5000/variants/${variant.id}/${selectButtonValue === "С ответами" ? "answers" : "document"}`,
+            );
+        },
+        [selectButtonValue],
+    );
 
     const styles = pageStyles();
 
