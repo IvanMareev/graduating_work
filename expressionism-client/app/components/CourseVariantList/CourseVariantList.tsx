@@ -1,18 +1,18 @@
 "use client";
 
 import { fetcherDelete, fetcherGet, fetcherPatch, fetcherPost } from "@/app/api/fetchers";
-import { IconButton } from "@/app/components/ui/icon-button";
 import { CourseVariant } from "@/app/types/model";
 import { css, sva } from "@/styled-system/css";
 import { Box } from "@/styled-system/jsx";
-import { ChevronLeft, ChevronRight, CircleAlert, PlusIcon, Trash2 } from "lucide-react";
+import { CircleAlert, Trash2 } from "lucide-react";
 import { observer } from "mobx-react-lite";
+import { Button } from "primereact/button";
 import { confirmDialog } from "primereact/confirmdialog";
 import { ContextMenu } from "primereact/contextmenu";
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import useSWR from "swr";
-import { CourseTreeState } from "../NewDisciplineTree/DisciplineTreeView";
+import { CourseTreeState } from "../DisciplineTree/DisciplineTreeView";
 import { CourseVariantTab } from "./CourseVariantTab";
 
 const courseVariantsListStyles = sva({
@@ -168,6 +168,8 @@ const CourseVariantList: React.FC<CourseVariantListProps> = observer(function Co
         ));
     };
 
+    const buttonStyles = { padding: "0", width: "32px", height: "32px", boxShadow: "none" };
+
     return (
         <>
             <Box className={styles.root}>
@@ -179,29 +181,36 @@ const CourseVariantList: React.FC<CourseVariantListProps> = observer(function Co
                     pl={2}
                     boxShadow="-2px 0 0 0 var(--colors-border-default)"
                 >
-                    <IconButton variant="ghost" size="sm" onClick={newCourseVariant}>
-                        <PlusIcon />
-                    </IconButton>
-                    <IconButton
-                        variant="ghost"
-                        size="sm"
+                    <Button
+                        icon="pi pi-plus"
+                        text
+                        size="small"
+                        severity="secondary"
+                        style={buttonStyles}
+                        onClick={newCourseVariant}
+                    />
+                    <Button
+                        icon="pi pi-chevron-left"
+                        text
+                        size="small"
+                        severity="secondary"
+                        style={buttonStyles}
                         disabled={selectedItem <= 0}
                         onClick={() => {
                             selectItem(selectedItem - 1);
                         }}
-                    >
-                        <ChevronLeft />
-                    </IconButton>
-                    <IconButton
-                        variant="ghost"
-                        size="sm"
+                    />
+                    <Button
+                        icon="pi pi-chevron-right"
+                        text
+                        size="small"
+                        style={buttonStyles}
+                        severity="secondary"
                         disabled={selectedItem >= data!.length - 1}
                         onClick={() => {
                             selectItem(selectedItem + 1);
                         }}
-                    >
-                        <ChevronRight />
-                    </IconButton>
+                    />
                 </Box>
             </Box>
             <ContextMenu

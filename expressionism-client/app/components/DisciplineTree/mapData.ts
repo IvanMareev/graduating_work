@@ -17,7 +17,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { confirmPopup } from "primereact/confirmpopup";
 import { Dispatch, SetStateAction } from "react";
 import { TreeItem } from "react-complex-tree";
-import { TreeNodeButtonProps } from "../DisciplineTree/TreeNodeButton";
+import { TreeNodeButtonProps } from "./TreeNodeButton";
 
 export enum TreeItemAccesoryType {
     CourseStructure,

@@ -5,7 +5,7 @@ import { ConfirmDialog } from "primereact/confirmdialog";
 import { ConfirmPopup } from "primereact/confirmpopup";
 import DisciplineTreeView, {
     courseTreeState,
-} from "./components/NewDisciplineTree/DisciplineTreeView";
+} from "./components/DisciplineTree/DisciplineTreeView";
 
 export default function Home() {
     return (
