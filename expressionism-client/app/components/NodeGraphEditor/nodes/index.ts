@@ -7,6 +7,7 @@ import PowNode from "./PowNode";
 import ResultNode from "./ResultNode";
 import SimplificationNode from "./SimplificationNode";
 import SubstitutionNode from "./SubstitutionNode";
+import { CONDITION_NODES, FUNCTION_NODES, LARGE_OPERATORS, MAIN_NODES } from "./types";
 
 const nodeTypes = {
     result: ResultNode,
@@ -20,15 +21,18 @@ const nodeTypes = {
     branch: BranchNode,
 };
 
+const nodeGroups = [MAIN_NODES, CONDITION_NODES, FUNCTION_NODES, LARGE_OPERATORS];
+
 export {
     BranchNode,
     ExpressionNode,
     InversionNode,
     JoinNode,
     LimitNode,
+    nodeGroups,
+    nodeTypes,
     PowNode,
     ResultNode,
     SimplificationNode,
     SubstitutionNode,
-    nodeTypes,
 };

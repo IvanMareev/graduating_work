@@ -2,8 +2,9 @@ import { ChangeEvent, useState } from "react";
 import { NodeProps, useStore } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
+import { ExpressionismNode, FUNCTION_NODES } from "./types";
 
-const PowNode = (props: NodeProps) => {
+const PowNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const nodes = useStore((s) => s.getNodes());
     const setNodes = useStore((s) => s.setNodes);
     const [sourceExpr, setSourceExpr] = useState(props.data.sourceExpression);
@@ -61,5 +62,9 @@ const PowNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+PowNode.label = "Степень";
+PowNode.group = FUNCTION_NODES;
+PowNode.data = { sourceExpression: "x", degree: "2" };
 
 export default PowNode;

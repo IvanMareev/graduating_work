@@ -1,8 +1,9 @@
 import { NodeProps, useReactFlow } from "reactflow";
 import { BaseNode, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
+import { ExpressionismNode, MAIN_NODES } from "./types";
 
-const ExpressionNode = (props: NodeProps) => {
+const ExpressionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const { getNodes, setNodes } = useReactFlow();
 
     return (
@@ -30,5 +31,9 @@ const ExpressionNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+ExpressionNode.label = "Выражение";
+ExpressionNode.group = MAIN_NODES;
+ExpressionNode.data = { value: "" };
 
 export default ExpressionNode;

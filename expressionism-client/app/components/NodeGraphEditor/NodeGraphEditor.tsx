@@ -4,7 +4,9 @@ import { Generator } from "@/app/types/model";
 import { nanoid } from "nanoid/non-secure";
 import { ContextMenu } from "primereact/contextmenu";
 import {
+    Dispatch,
     forwardRef,
+    SetStateAction,
     useCallback,
     useEffect,
     useImperativeHandle,
@@ -33,7 +35,8 @@ import ReactFlow, {
     XYPosition,
 } from "reactflow";
 import useSWR from "swr";
-import { nodeTypes } from "./nodes";
+import { nodeGroups, nodeTypes } from "./nodes";
+import { IGNORE_NODES, NodeInfo } from "./nodes/types";
 
 const getInitialNodes = () => {
     return [
@@ -51,6 +54,40 @@ export type NodeGraphRef = {
     save: () => Promise<void>;
 };
 
+function createNode(type: string, data: object, nodePosition: XYPosition) {
+    return {
+        id: nanoid(),
+        type,
+        position: nodePosition,
+        data,
+    };
+}
+
+function getPaneContextItems(
+    contextPanePosition: XYPosition,
+    setNodes: Dispatch<SetStateAction<Node<any, string | undefined>[]>>,
+) {
+    const nodeTypesKeys = Object.keys(nodeTypes);
+    return nodeGroups.map((group) => {
+        const groupItems = nodeTypesKeys
+            .filter((key) => {
+                const nodeGroup = nodeTypes[key as keyof typeof nodeTypes].group;
+                return nodeGroup === group && nodeGroup !== IGNORE_NODES;
+            })
+            .map((key) => {
+                const node: NodeInfo = nodeTypes[key as keyof typeof nodeTypes];
+                return {
+                    label: node.label,
+                    command: () => {
+                        const newNode: Node = createNode(key, node.data || {}, contextPanePosition);
+                        setNodes((nds) => nds.concat(newNode));
+                    },
+                };
+            });
+        return { label: group, items: groupItems };
+    });
+}
+
 const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     const { data, mutate } = useSWR<Generator>("generators/" + props.generatorId, fetcherGet, {
         revalidateOnFocus: false,
@@ -67,150 +104,8 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     const [contextNode, setContextNode] = useState<Node | null>(null);
     const [contextPanePosition, setContextPanePosition] = useState<XYPosition>({ x: 0, y: 0 });
 
-    const createNode = (type: string, data: any) => ({
-        id: nanoid(),
-        type,
-        position: contextPanePosition,
-        data,
-    });
-
     const paneContextItems = useMemo(
-        () => [
-            {
-                label: "Основные узлы",
-                items: [
-                    {
-                        label: "Выражение",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "expression",
-                                position: contextPanePosition,
-                                data: { value: "" },
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    {
-                        label: "Соединение",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "join",
-                                position: contextPanePosition,
-                                data: { operator: "+" },
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    {
-                        label: "Подстановка",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "substitution",
-                                position: contextPanePosition,
-                                data: {
-                                    variable: "x",
-                                    sourceExpression: "",
-                                    substituteExpression: "",
-                                },
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    {
-                        label: "Инверсия",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "inversion",
-                                position: contextPanePosition,
-                                data: {},
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    {
-                        label: "Упрощение",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "simplification",
-                                position: contextPanePosition,
-                                data: {},
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                ],
-            },
-            {
-                label: "Узлы условий",
-                items: [
-                    {
-                        label: "Ветвление",
-                        command: () => {
-                            const newNode = createNode("branch", { branches: ["", ""] });
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    { label: "Выбор" },
-                    { label: "Ограничение" },
-                ],
-            },
-            {
-                label: "Узлы функций",
-                items: [
-                    { label: "Функция" },
-                    { label: "Корень" },
-                    { label: "Логарифм" },
-                    {
-                        label: "Степень",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "pow",
-                                position: contextPanePosition,
-                                data: { sourceExpression: "x", degree: "2" },
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                ],
-            },
-            {
-                label: "Крупные операторы",
-                items: [
-                    {
-                        label: "Предел",
-                        command: () => {
-                            const newNode: Node = {
-                                id: nanoid(),
-                                type: "limit",
-                                position: contextPanePosition,
-                                data: {
-                                    sourceExpression: "x",
-                                    limitDir: "+-",
-                                    limitTarget: "2",
-                                    limitVariable: "k",
-                                },
-                            };
-
-                            setNodes((nds) => nds.concat(newNode));
-                        },
-                    },
-                    { label: "Интеграл" },
-                    { label: "Определенный интеграл" },
-                ],
-            },
-        ],
+        () => getPaneContextItems(contextPanePosition, setNodes),
         [contextPanePosition, setNodes],
     );
 

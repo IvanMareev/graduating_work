@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { NodeProps, useReactFlow, useUpdateNodeInternals } from "reactflow";
 import { BaseNode, InputHandle } from "./NodePrimitives";
 import { DropdownField } from "./fields";
+import { ExpressionismNode, IGNORE_NODES } from "./types";
 
 const taskTypes = ["решить", "неравенство"];
 
-const ResultNode = (props: NodeProps) => {
+const ResultNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const { getNodes, setNodes } = useReactFlow();
     const updateNodeInternals = useUpdateNodeInternals();
     const [taskType, setTaskType] = useState(props.data.taskType);
@@ -54,5 +55,8 @@ const ResultNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+ResultNode.label = "Результат";
+ResultNode.group = IGNORE_NODES;
 
 export default ResultNode;

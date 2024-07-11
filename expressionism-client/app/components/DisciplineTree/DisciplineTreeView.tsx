@@ -24,6 +24,8 @@ import GenerationPopup from "../Results/GenerationPopup";
 import mapDataToTree, { TreeItemData, TreeItemType } from "./mapData";
 import disciplineTreeRenderers from "./renderers";
 import { disciplineTreeViewStyles } from "./styles";
+import { ConfirmPopup } from "primereact/confirmpopup";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
 export class CourseTreeState {
     expandedItems: TreeItemIndex[] = [];
@@ -236,6 +238,8 @@ const DisciplineTreeView = observer(function DisciplineTreeView({
                     router.push("/results/" + taskId);
                 }}
             />
+            <ConfirmPopup />
+            <ConfirmDialog />
         </ControlledTreeEnvironment>
     );
 });

@@ -3,6 +3,7 @@ import { ChangeEvent, useCallback, useState } from "react";
 import { NodeProps, useReactFlow } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { DropdownField, InputField } from "./fields";
+import { ExpressionismNode, MAIN_NODES } from "./types";
 
 const substituteVariables = [
     "a",
@@ -24,7 +25,7 @@ const substituteVariables = [
     "w",
 ];
 
-const SubstitutionNode = (props: NodeProps) => {
+const SubstitutionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const { getNodes, setNodes } = useReactFlow();
     const [symbol, setSymbol] = useState(props.data.variable);
     const [sourceExpr, setSourceExpr] = useState(props.data.sourceExpression);
@@ -113,5 +114,9 @@ const SubstitutionNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+SubstitutionNode.label = "Подстановка";
+SubstitutionNode.group = MAIN_NODES;
+SubstitutionNode.data = { variable: "x", sourceExpression: "", substituteExpression: "" };
 
 export default SubstitutionNode;

@@ -1,7 +1,8 @@
 import { NodeProps } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
+import { ExpressionismNode, MAIN_NODES } from "./types";
 
-const InversionNode = (props: NodeProps) => {
+const InversionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     return (
         <BaseNode title="Инверсия" color="violet" {...props}>
             <OutputHandle handleId="out-1" label="Результат"></OutputHandle>
@@ -9,5 +10,8 @@ const InversionNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+InversionNode.label = "Инверсия";
+InversionNode.group = MAIN_NODES;
 
 export default InversionNode;

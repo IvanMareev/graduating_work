@@ -3,6 +3,7 @@ import { ChangeEvent, useCallback, useState } from "react";
 import { NodeProps, useReactFlow } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { DropdownField, InputField } from "./fields";
+import { ExpressionismNode, LARGE_OPERATORS } from "./types";
 
 const substituteVariables = [
     "a",
@@ -26,7 +27,7 @@ const substituteVariables = [
 
 const limitDirections = ["+-", "-", "+"];
 
-const LimitNode = (props: NodeProps) => {
+const LimitNode: ExpressionismNode<NodeProps> = (props) => {
     const { getNodes, setNodes } = useReactFlow();
 
     const [limitDir, setLimitDir] = useState(props.data.limitDir);
@@ -144,6 +145,15 @@ const LimitNode = (props: NodeProps) => {
             </InputHandle>
         </BaseNode>
     );
+};
+
+LimitNode.label = "Предел";
+LimitNode.group = LARGE_OPERATORS;
+LimitNode.data = {
+    limitDir: "+-",
+    limitVariable: "x",
+    sourceExpression: "2",
+    limitTarget: "0",
 };
 
 export default LimitNode;
