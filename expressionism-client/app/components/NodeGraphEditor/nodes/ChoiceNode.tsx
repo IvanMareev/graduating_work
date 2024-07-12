@@ -1,10 +1,10 @@
-import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import { NodeProps, useReactFlow, useUpdateNodeInternals } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
+import { CONDITION_NODES, ExpressionismNode } from "./types";
 
-const ChoiceNode = (props: NodeProps) => {
+const ChoiceNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const { getNodes, setNodes } = useReactFlow();
     const updateNodeInternals = useUpdateNodeInternals();
     const [branches, setBranches] = useState(["", ""]);
@@ -44,20 +44,9 @@ const ChoiceNode = (props: NodeProps) => {
                             setBranchesWrapper(newBranches);
                         }}
                     />
-                    {/* <Button
-                        icon="pi pi-times"
-                        size="small"
-                        text
-                        severity="danger"
-                        style={{ padding: "2px", width: "28px" }}
-                        disabled={i < 2}
-                        onClick={() => {
-                            setBranchesWrapper(branches.filter((_, j) => j !== i));
-                        }}
-                    /> */}
                 </InputHandle>
             ))}
-{/* 
+            {/* 
             <Button
                 icon="pi pi-plus"
                 label="Новая ветвь"
@@ -72,5 +61,9 @@ const ChoiceNode = (props: NodeProps) => {
         </BaseNode>
     );
 };
+
+ChoiceNode.label = "Выбор";
+ChoiceNode.group = CONDITION_NODES;
+ChoiceNode.data = {};
 
 export default ChoiceNode;

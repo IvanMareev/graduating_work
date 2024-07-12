@@ -36,7 +36,6 @@ const BranchNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             {branches.map((branch, i) => (
                 <InputHandle key={i} handleId={`branch-${i}`} label={`Выражение ${i + 1}`}>
                     <InputField
-                        id={"1"}
                         value={branch}
                         placeholder="Введите выражение"
                         onChange={(e) => {
@@ -44,17 +43,19 @@ const BranchNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
                             newBranches[i] = e.target.value;
                             setBranchesWrapper(newBranches);
                         }}
-                    />
-                    <Button
-                        icon="pi pi-times"
-                        size="small"
-                        text
-                        severity="danger"
-                        style={{ padding: "2px", width: "28px" }}
-                        disabled={i < 2}
-                        onClick={() => {
-                            setBranchesWrapper(branches.filter((_, j) => j !== i));
-                        }}
+                        rightElements={
+                            i > 1 && (
+                                <Button
+                                    icon="pi pi-times"
+                                    size="small"
+                                    severity="danger"
+                                    style={{ padding: "0", width: "42px" }}
+                                    onClick={() => {
+                                        setBranchesWrapper(branches.filter((_, j) => j !== i));
+                                    }}
+                                />
+                            )
+                        }
                     />
                 </InputHandle>
             ))}
@@ -76,6 +77,6 @@ const BranchNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
 
 BranchNode.label = "Ветвление";
 BranchNode.group = CONDITION_NODES;
-BranchNode.data = { branches: ["", ""] }
+BranchNode.data = { branches: ["", ""] };
 
 export default BranchNode;

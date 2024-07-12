@@ -8,7 +8,7 @@ const DropdownField = (props: DropdownProps) => {
                 "nodrag",
                 css({
                     w: "full",
-                    "& .p-dropdown-label": { fontSize: "18px!", p: "2px 0 2px 8px !" },
+                    "& .p-dropdown-label": { fontSize: "18px!", p: "6.5px 12px !" },
                     "& .p-dropdown-trigger": { w: "32px!" },
                 }),
                 props.className,

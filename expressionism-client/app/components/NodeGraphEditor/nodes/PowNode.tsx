@@ -1,19 +1,18 @@
 import { ChangeEvent, useState } from "react";
-import { NodeProps, useStore } from "reactflow";
+import { NodeProps, useReactFlow } from "reactflow";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 import { ExpressionismNode, FUNCTION_NODES } from "./types";
 
 const PowNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
-    const nodes = useStore((s) => s.getNodes());
-    const setNodes = useStore((s) => s.setNodes);
+    const { getNodes, setNodes } = useReactFlow();
     const [sourceExpr, setSourceExpr] = useState(props.data.sourceExpression);
     const [degree, setDegree] = useState(props.data.degree);
 
     const handleSourceExpressionChange = (e: ChangeEvent<HTMLInputElement>) => {
         setSourceExpr(e.target.value);
         setNodes(
-            nodes.map((node) => {
+            getNodes().map((node) => {
                 if (node.id === props.id) {
                     node.data = {
                         ...node.data,
@@ -28,7 +27,7 @@ const PowNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const handleDegreeChange = (e: ChangeEvent<HTMLInputElement>) => {
         setDegree(e.target.value);
         setNodes(
-            nodes.map((node) => {
+            getNodes().map((node) => {
                 if (node.id === props.id) {
                     node.data = {
                         ...node.data,
@@ -45,7 +44,6 @@ const PowNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             <OutputHandle handleId="out-1" label="Результат"></OutputHandle>
             <InputHandle handleId="source-expression" label="Основание">
                 <InputField
-                    id={"1"}
                     value={sourceExpr}
                     placeholder="Введите выражение"
                     onChange={handleSourceExpressionChange}
@@ -53,7 +51,6 @@ const PowNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             </InputHandle>
             <InputHandle handleId="degree-expression" label="Показатель">
                 <InputField
-                    id={"2"}
                     value={degree}
                     placeholder="Введите показатель степени"
                     onChange={handleDegreeChange}

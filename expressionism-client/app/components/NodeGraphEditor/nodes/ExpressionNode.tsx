@@ -10,7 +10,6 @@ const ExpressionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
         <BaseNode title="Выражение" color="green" {...props}>
             <OutputHandle handleId="out-1">
                 <InputField
-                    id={"1"}
                     value={props.data?.value}
                     placeholder="Введите выражение"
                     onChange={(e) => {

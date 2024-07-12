@@ -1,4 +1,5 @@
 import BranchNode from "./BranchNode";
+import ChoiceNode from "./ChoiceNode";
 import ExpressionNode from "./ExpressionNode";
 import InversionNode from "./InversionNode";
 import JoinNode from "./JoinNode";
@@ -8,6 +9,8 @@ import ResultNode from "./ResultNode";
 import SimplificationNode from "./SimplificationNode";
 import SubstitutionNode from "./SubstitutionNode";
 import { CONDITION_NODES, FUNCTION_NODES, LARGE_OPERATORS, MAIN_NODES } from "./types";
+
+const nodeGroups = [MAIN_NODES, CONDITION_NODES, FUNCTION_NODES, LARGE_OPERATORS];
 
 const nodeTypes = {
     result: ResultNode,
@@ -19,12 +22,12 @@ const nodeTypes = {
     pow: PowNode,
     limit: LimitNode,
     branch: BranchNode,
+    choice: ChoiceNode,
 };
-
-const nodeGroups = [MAIN_NODES, CONDITION_NODES, FUNCTION_NODES, LARGE_OPERATORS];
 
 export {
     BranchNode,
+    ChoiceNode,
     ExpressionNode,
     InversionNode,
     JoinNode,

@@ -37,7 +37,7 @@ const InputHandle = (props: HandleProps) => {
     return (
         <>
             {props.label && (
-                <Box fontSize="sm" position="relative">
+                <Box fontSize="md" position="relative">
                     {props.label}
                     {handle}
                 </Box>
@@ -72,7 +72,7 @@ const OutputHandle = (props: HandleProps) => {
                 className={props.className}
             >
                 {props.children && <Box w="full">{props.children}</Box>}
-                {props.label && <Box fontSize="sm">{props.label}</Box>}
+                {props.label && <Box fontSize="md">{props.label}</Box>}
                 <Handle
                     type={"source"}
                     id={`node-${nodeId}_handle-${props.handleId}`}
@@ -108,7 +108,7 @@ const baseNodeStyles = sva({
             px: 3,
             py: 1.5,
             color: "slate.1",
-            fontSize: "md",
+            fontSize: "xl",
             boxShadow: "sm",
             borderTopRadius: "5px",
         },
@@ -119,9 +119,9 @@ const baseNodeStyles = sva({
             alignItems: "center",
             py: 3,
             px: 3,
-            gridColumnGap: 1,
+            gridColumnGap: 2,
             gridRowGap: 2,
-            minW: "180px",
+            minW: "240px",
             gridTemplateColumns: "auto auto",
             gridAutoRows: "minmax(20px, auto)",
         },
