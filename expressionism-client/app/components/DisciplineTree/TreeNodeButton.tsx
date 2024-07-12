@@ -46,7 +46,7 @@ export type TreeNodeButtonProps = RecipeVariantProps<typeof treeItemButton> & {
     tooltip?: string;
     tooltipId?: string;
     popover?: PopoverConfig;
-    onClick?: (context: TreeItemRenderContext, e: any) => void;
+    onClick?: (e: any) => void;
 };
 
 interface TooltipProps {

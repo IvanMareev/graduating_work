@@ -120,13 +120,115 @@ const ResultsList = ({ task, onResultSelect }: ResultsListProps) => {
         onResultSelect(results.length === 0 ? null : results[idx]);
     }, [onResultSelect, results, selectedResultIdx]);
 
-    const generationConfirm = (event) => {
+    const generationConfirm = (event: any) => {
         confirmPopup({
+            //@ts-ignore
             group: "generation",
             target: event.currentTarget,
             defaultFocus: "accept",
         });
     };
+
+    const accordionElement = (
+        <Accordion
+            expandIcon={<div></div>}
+            collapseIcon={<div></div>}
+            activeIndex={selectedResultIdx}
+            onTabChange={(e) => {
+                if (e.index == null) return;
+                //@ts-ignore
+                setSelectedResultIdx(e.index);
+                //@ts-ignore
+                onResultSelect?.(results[e.index]);
+            }}
+            //@ts-ignore
+            unstyled
+            pt={{
+                root: { className: style.root },
+                accordiontab: {
+                    header: ({ context }: any) => ({
+                        className: cx(style.header, context.selected ? style.headerSelected : null),
+                    }),
+                    content: { className: style.content },
+                    transition: TRANSITIONS.toggleable,
+                },
+            }}
+        >
+            {results.map((result, index) => {
+                const chkBoxId = index + "_checkbox";
+                return (
+                    <AccordionTab
+                        key={index}
+                        header={
+                            <Flex gap={3} alignItems="center">
+                                <FlaskConical size={18} />
+                                {result.name}
+                                <Box flex="1 0"></Box>
+                                <div className={style.extra}>
+                                    <TreeNodeButton
+                                        icon={FileUp}
+                                        tooltip="Экспортировать"
+                                        tooltipId="button-tooltip"
+                                        onClick={async (e) => {
+                                            await ky
+                                                .get(
+                                                    `http://127.0.0.1:5000/results/${result.id}/export`,
+                                                )
+                                                .then((res) => res.blob())
+                                                .then((blob) => {
+                                                    let el = document.createElement("a");
+                                                    el.setAttribute(
+                                                        "download",
+                                                        `Экспорт_${task?.name}_Результат_${index + 1}`,
+                                                    );
+                                                    el.href = URL.createObjectURL(blob);
+                                                    el.click();
+                                                });
+                                        }}
+                                    />
+                                    <TreeNodeButton
+                                        icon={Trash2}
+                                        tooltip="Удалить"
+                                        tooltipId="button-tooltip"
+                                        hoverColor="red"
+                                        popover={{
+                                            title: "Удалить результаты",
+                                            content:
+                                                "Вы действительно хотите удалить результаты генерации?",
+                                            confirmAction: async () => {
+                                                if (result == null) {
+                                                    return;
+                                                }
+                                                await apiActions.delete.results(result.id);
+                                                await mutate();
+                                            },
+                                        }}
+                                    />
+                                </div>
+                            </Flex>
+                        }
+                    >
+                        <Box fontSize="sm">Дата: {result.created_at}</Box>
+                        <Box fontSize="sm">
+                            <Checkbox
+                                inputId={chkBoxId}
+                                checked={result.issued}
+                                onChange={async (e) => {
+                                    await apiActions.edit.result(result.id, {
+                                        issued: e.checked,
+                                    });
+                                    await mutate();
+                                }}
+                            />
+                            <label htmlFor={chkBoxId} className={css({ ml: "2" })}>
+                                Выдано
+                            </label>
+                        </Box>
+                    </AccordionTab>
+                );
+            })}
+        </Accordion>
+    );
 
     return (
         <div className={boxStyles.boxRoot}>
@@ -147,108 +249,7 @@ const ResultsList = ({ task, onResultSelect }: ResultsListProps) => {
                             <p>Сгенерируйте первые варианты этого задания нажав на кнопку ниже!</p>
                         </Center>
                     ) : (
-                        <Accordion
-                            expandIcon={<div></div>}
-                            collapseIcon={<div></div>}
-                            activeIndex={selectedResultIdx}
-                            onTabChange={(e) => {
-                                if (e.index == null) return;
-                                setSelectedResultIdx(e.index);
-                                onResultSelect?.(results[e.index]);
-                            }}
-                            unstyled
-                            pt={{
-                                root: { className: style.root },
-                                accordiontab: {
-                                    header: ({ context }) => ({
-                                        className: cx(
-                                            style.header,
-                                            context.selected ? style.headerSelected : null,
-                                        ),
-                                    }),
-                                    content: { className: style.content },
-                                    transition: TRANSITIONS.toggleable,
-                                },
-                            }}
-                        >
-                            {results.map((result, index) => {
-                                const chkBoxId = index + "_checkbox";
-                                return (
-                                    <AccordionTab
-                                        key={index}
-                                        header={
-                                            <Flex gap={3} alignItems="center">
-                                                <FlaskConical size={18} />
-                                                {result.name}
-                                                <Box flex="1 0"></Box>
-                                                <div className={style.extra}>
-                                                    <TreeNodeButton
-                                                        icon={FileUp}
-                                                        tooltip="Экспортировать"
-                                                        tooltipId="button-tooltip"
-                                                        onClick={async (e) => {
-                                                            await ky
-                                                                .get(
-                                                                    `http://127.0.0.1:5000/results/${result.id}/export`,
-                                                                )
-                                                                .then((res) => res.blob())
-                                                                .then((blob) => {
-                                                                    let el =
-                                                                        document.createElement("a");
-                                                                    el.setAttribute(
-                                                                        "download",
-                                                                        `Экспорт_${task?.name}_Результат_${index + 1}`,
-                                                                    );
-                                                                    el.href =
-                                                                        URL.createObjectURL(blob);
-                                                                    el.click();
-                                                                });
-                                                        }}
-                                                    />
-                                                    <TreeNodeButton
-                                                        icon={Trash2}
-                                                        tooltip="Удалить"
-                                                        tooltipId="button-tooltip"
-                                                        hoverColor="red"
-                                                        popover={{
-                                                            title: "Удалить результаты",
-                                                            content:
-                                                                "Вы действительно хотите удалить результаты генерации?",
-                                                            confirmAction: async () => {
-                                                                if (result == null) {
-                                                                    return;
-                                                                }
-                                                                await apiActions.delete.results(
-                                                                    result.id,
-                                                                );
-                                                                await mutate();
-                                                            },
-                                                        }}
-                                                    />
-                                                </div>
-                                            </Flex>
-                                        }
-                                    >
-                                        <Box fontSize="sm">Дата: {result.created_at}</Box>
-                                        <Box fontSize="sm">
-                                            <Checkbox
-                                                inputId={chkBoxId}
-                                                checked={result.issued}
-                                                onChange={async (e) => {
-                                                    await apiActions.edit.result(result.id, {
-                                                        issued: e.checked,
-                                                    });
-                                                    await mutate();
-                                                }}
-                                            />
-                                            <label htmlFor={chkBoxId} className={css({ ml: "2" })}>
-                                                Выдано
-                                            </label>
-                                        </Box>
-                                    </AccordionTab>
-                                );
-                            })}
-                        </Accordion>
+                        accordionElement
                     )}
                 </Box>
                 <Button

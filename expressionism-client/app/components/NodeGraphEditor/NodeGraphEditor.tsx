@@ -176,13 +176,13 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     }, [data, setEdges, setNodes, setViewport]);
 
     const isValidConnection = useCallback(
-        (connection) => {
+        (connection: Connection) => {
             // we are using getNodes and getEdges helpers here
             // to make sure we create isValidConnection function only once
             const nodes = getNodes();
             const edges = getEdges();
             const target = nodes.find((node) => node.id === connection.target);
-            const hasCycle = (node, visited = new Set()) => {
+            const hasCycle = (node: Node, visited = new Set()) => {
                 if (visited.has(node.id)) return false;
 
                 visited.add(node.id);
@@ -192,7 +192,7 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
                     if (hasCycle(outgoer, visited)) return true;
                 }
             };
-
+            if (target == null) return false;
             if (target.id === connection.source) return false;
             return !hasCycle(target);
         },

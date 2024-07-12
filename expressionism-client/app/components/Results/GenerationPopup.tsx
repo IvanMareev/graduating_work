@@ -11,6 +11,7 @@ const GenerationPopup = (props: {
 
     return (
         <ConfirmPopup
+            //@ts-ignore
             group="generation"
             content={({ acceptBtnRef, hide }) => {
                 return (
@@ -24,11 +25,12 @@ const GenerationPopup = (props: {
                                 min={1}
                                 max={100}
                                 useGrouping={false}
-                                onValueChange={(e) => setVariantsCount(e.value)}
+                                onValueChange={(e) => setVariantsCount(e.value ? e.value : 1)}
                                 showButtons
                                 buttonLayout="stacked"
                             />
                             <Button
+                                // @ts-ignore
                                 ref={acceptBtnRef}
                                 type="button"
                                 size="small"

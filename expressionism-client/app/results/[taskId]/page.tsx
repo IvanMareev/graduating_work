@@ -123,11 +123,16 @@ export default function ResultsPage({ params }: { params: { taskId: number } }) 
     const handleVariantSelect = useCallback(
         (variant: Variant | null) => {
             setVariant(variant);
+            if (variant == null) {
+                if (genResult != null)
+                    setPreviewFileUrl(`http://127.0.0.1:5000/results/${genResult.id}/export`);
+                return;
+            }
             setPreviewFileUrl(
                 `http://127.0.0.1:5000/variants/${variant.id}/${selectButtonValue === "С ответами" ? "answers" : "document"}`,
             );
         },
-        [selectButtonValue],
+        [genResult, selectButtonValue],
     );
 
     const styles = pageStyles();

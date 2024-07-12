@@ -90,7 +90,6 @@ const SubstitutionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             <OutputHandle handleId="out-1" label="Результат"></OutputHandle>
             <InputHandle handleId="source-expression" label="В выражение">
                 <InputField
-                    id={"1"}
                     value={sourceExpr}
                     placeholder="Введите выражение"
                     onChange={handleSourceExpressionChange}
@@ -105,7 +104,6 @@ const SubstitutionNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             </InputHandle>
             <InputHandle handleId="expression-to-substitute" label="Подставить">
                 <InputField
-                    id={"2"}
                     value={substituteExpr}
                     placeholder="Введите выражение"
                     onChange={handleSubstituteExpressionChange}

@@ -16,7 +16,7 @@ import {
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { confirmPopup } from "primereact/confirmpopup";
 import { Dispatch, SetStateAction } from "react";
-import { TreeItem } from "react-complex-tree";
+import { TreeItem, TreeItemRenderContext } from "react-complex-tree";
 import { TreeNodeButtonProps } from "./TreeNodeButton";
 
 export enum TreeItemAccesoryType {
@@ -35,6 +35,10 @@ export type TreeItemEditData = {
     taskType?: string;
 };
 
+type ExtraType = Omit<TreeNodeButtonProps, "onClick"> & {
+    onClick?: (context: TreeItemRenderContext, e: any) => void;
+};
+
 export type TreeItemData = {
     title: string;
     icon?: React.ElementType;
@@ -44,7 +48,7 @@ export type TreeItemData = {
     isAction?: boolean;
     taskInfo?: Task;
     action?: React.MouseEventHandler<HTMLElement>;
-    extra?: TreeNodeButtonProps[];
+    extra?: ExtraType[];
 };
 
 interface TreeItemExtended<T> extends TreeItem<T> {
@@ -298,6 +302,7 @@ function mapDataToTree(
                                         : "Сначала добавьте генераторы в КИМ",
                                 onClick: (context, e) => {
                                     confirmPopup({
+                                        //@ts-ignore
                                         group: "generation",
                                         target: e.currentTarget,
                                         defaultFocus: "accept",

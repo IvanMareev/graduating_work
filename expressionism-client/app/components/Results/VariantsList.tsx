@@ -101,7 +101,6 @@ const VariantsList = ({ genResult, onVariantSelect }: VariantsListProps) => {
                     options={variants}
                     emptyMessage="Выберите результат из списка выше, чтобы просмотреть имеющиеся варианты"
                     onChange={(e) => {
-                        if (e.value == null) return;
                         setSelectedVariant(e.value);
                         onVariantSelect?.(e.value);
                     }}

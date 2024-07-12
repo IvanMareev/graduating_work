@@ -113,7 +113,7 @@ const GeneratorOptionsEditor = forwardRef((props: GeneratorOptionsEditorProps, r
         const loadedCoefficients = JSON.parse(data.coefficients) || [];
         setCoefficients(loadedCoefficients);
         const availableCoefficients = initialCoefOptions.filter(
-            (option) => !loadedCoefficients.some((coef) => coef.name === option),
+            (option) => !loadedCoefficients.some((coef: any) => coef.name === option),
         );
         setCoefOptions(availableCoefficients);
         if (availableCoefficients.length > 0) setSelectedCoefOption(availableCoefficients[0]);
@@ -270,6 +270,7 @@ const GeneratorOptionsEditor = forwardRef((props: GeneratorOptionsEditorProps, r
                             showGridlines
                             emptyMessage="Коэффициентов нет"
                             onContextMenu={(e) => coefCm.current?.show(e.originalEvent)}
+                            // @ts-ignore
                             contextMenuSelection={selectedCoef}
                             onContextMenuSelectionChange={(e) => setSelectedCoef(e.value)}
                         >
@@ -311,6 +312,7 @@ const GeneratorOptionsEditor = forwardRef((props: GeneratorOptionsEditorProps, r
                             showGridlines
                             emptyMessage="Ограничений нет"
                             onContextMenu={(e) => restrictCm.current?.show(e.originalEvent)}
+                            // @ts-ignore
                             contextMenuSelection={selectedRestrict}
                             onContextMenuSelectionChange={(e) => setSelectedRestrict(e.value)}
                         >

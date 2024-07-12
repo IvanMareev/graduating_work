@@ -7,7 +7,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "knip": "knip"
     },
     "dependencies": {
         "@ark-ui/react": "^3.5.0",
@@ -46,16 +47,15 @@
         "@pandacss/shared": ">=0.36.1",
         "@pandacss/types": ">0.22.0",
         "@park-ui/panda-preset": "^0.38.1",
-        "@types/node": "^20",
+        "@types/node": "^20.14.10",
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "eslint": "^8",
         "eslint-config-next": "^14.2.4",
+        "knip": "^5.25.2",
         "postcss": "^8.4.38",
         "prettier": "^3.2.5",
-        "prettier-plugin-tailwindcss": "^0.5.14",
         "tailwindcss": "^3.4.3",
-        "typescript": "^5",
-        "use-resize-observer": "^9.1.0"
+        "typescript": "^5.5.3"
     }
 }

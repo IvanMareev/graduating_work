@@ -115,7 +115,6 @@ const LimitNode: ExpressionismNode<NodeProps> = (props) => {
             <OutputHandle handleId="out-1" label="Результат"></OutputHandle>
             <InputHandle handleId="source-expression" label="Выражение">
                 <InputField
-                    id={"1"}
                     value={sourceExpr}
                     placeholder="Введите выражение"
                     onChange={handleFirstExpressionChange}
@@ -137,7 +136,6 @@ const LimitNode: ExpressionismNode<NodeProps> = (props) => {
                     style={{ maxWidth: "80px" }}
                 />
                 <InputField
-                    id={"2"}
                     value={targetExpr}
                     placeholder="Введите выражение"
                     onChange={handleSecondExpressionChange}

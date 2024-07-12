@@ -35,7 +35,6 @@ const ChoiceNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
             {branches.map((branch, i) => (
                 <InputHandle key={i} handleId={`branch-${i}`} label={`Выражение ${i + 1}`}>
                     <InputField
-                        id={"1"}
                         value={branch}
                         placeholder="Введите выражение"
                         onChange={(e) => {
