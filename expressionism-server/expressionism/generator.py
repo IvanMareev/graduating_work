@@ -76,7 +76,7 @@ class GeneratorSystem:
         return results
 
     @staticmethod
-    def preconfigure_doc() -> Document:
+    def _preconfigure_doc() -> Document:
         doc = Document()
         geometry_options = {"tmargin": "1cm", "lmargin": "2cm"}
         doc = Document(geometry_options=geometry_options)
@@ -87,7 +87,7 @@ class GeneratorSystem:
 
     @staticmethod
     def create_variant_pdf(results, variant_idx, file_path):
-        doc = GeneratorSystem.preconfigure_doc()
+        doc = GeneratorSystem._preconfigure_doc()
 
         task_idx = 1
         doc.append(Command("noindent"))
@@ -116,7 +116,7 @@ class GeneratorSystem:
 
     @staticmethod
     def create_variant_answers_pdf(results, variant_idx, file_path):
-        doc = GeneratorSystem.preconfigure_doc()
+        doc = GeneratorSystem._preconfigure_doc()
 
         doc.append(Command("noindent"))
 
@@ -147,7 +147,7 @@ class GeneratorSystem:
 
     @staticmethod
     def create_result_pdf(results, file_path):
-        doc = GeneratorSystem.preconfigure_doc()
+        doc = GeneratorSystem._preconfigure_doc()
 
         doc.append(Command("noindent"))
         for variant_idx in range(1, len(results[0]["variants"]) + 1):

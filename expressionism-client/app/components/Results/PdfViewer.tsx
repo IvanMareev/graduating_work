@@ -4,10 +4,7 @@ import { useState } from "react";
 
 import { Document, Page, pdfjs } from "react-pdf";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-    import.meta.url,
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
 const PdfViewer = (props: { fileUrl: string }) => {
     const [numPages, setNumPages] = useState<number>();
@@ -40,7 +37,12 @@ const PdfViewer = (props: { fileUrl: string }) => {
             >
                 {numPages &&
                     Array.from(new Array(numPages), (_, i) => (
-                        <Page key={i + 1} pageNumber={i + 1} className={css({ mb: 4 })} height={1100} />
+                        <Page
+                            key={i + 1}
+                            pageNumber={i + 1}
+                            className={css({ mb: 4 })}
+                            height={1100}
+                        />
                     ))}
             </Document>
         </Box>

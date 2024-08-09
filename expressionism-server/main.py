@@ -1,7 +1,6 @@
 from flask import jsonify, request, send_from_directory, send_file
 
 from config import app, db
-from misc import fill_sample_data
 from models import (
     Discipline,
     GenerationResult,
@@ -546,6 +545,8 @@ if __name__ == "__main__":
     with app.app_context():
         # db.drop_all()
         # db.create_all()
+
+        # from misc import fill_sample_data
         # fill_sample_data(db)
 
         # Find all old pdf files

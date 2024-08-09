@@ -19,7 +19,7 @@
         "mobx": "^6.13.0",
         "mobx-react-lite": "^4.0.7",
         "nanoid": "^5.0.7",
-        "next": "^14.2.4",
+        "next": "^14.2.5",
         "prettier-plugin-organize-imports": "^3.2.4",
         "primeicons": "^7.0.0",
         "primereact": "^10.6.6",
@@ -30,8 +30,6 @@
         "react-tooltip": "^5.26.4",
         "reactflow": "^11.11.3",
         "swr": "^2.2.5",
-        "tailwind-merge": "^2.3.0",
-        "tailwindcss-animate": "^1.0.7",
         "zod": "^3.23.8",
         "zod-validation-error": "^3.3.0"
     },
@@ -55,7 +53,7 @@
         "knip": "^5.25.2",
         "postcss": "^8.4.38",
         "prettier": "^3.2.5",
-        "tailwindcss": "^3.4.3",
         "typescript": "^5.5.3"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
