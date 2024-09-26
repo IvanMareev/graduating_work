@@ -3,21 +3,20 @@ from flask import jsonify, request, send_from_directory, send_file
 from config import app, db
 from models import (
     Discipline,
-    GenerationResult,
-    GenerationVariant,
-    CourseVariant,
-    Generator,
     Section,
-    Task,
     Topic,
     TaskGenerator,
+    Generator,
+    TaskType,
+    CourseVariant,
+    Task,
+    GenerationResult,
+    GenerationVariant,
 )
 from expressionism.generator import GeneratorSystem
-from icecream import ic
 
 import json
 import os
-import time
 
 
 def server_msg(msg: str, code: int):
@@ -516,10 +515,6 @@ def get_variant_answers_document(variant_id):
         json.loads(result.results), variant_index, file_path
     )
 
-    # ic(os.path.isfile(file_path + ".pdf"))
-    # time.sleep(1)
-
-    # return send_from_directory(app.static_folder, file_name)
     return send_file(file_path + ".pdf")
 
 
@@ -541,6 +536,26 @@ def export_result(result_id):
     return send_file(file_path + ".pdf")
 
 
+def remove_old_pdfs():
+    if not os.path.exists(app.static_folder):
+        return
+
+    # Find all old pdf files
+    pdf_files = [
+        file
+        for file in os.listdir(app.static_folder)
+        if file.startswith("variant_")
+        and file.endswith(".pdf")
+        or file.startswith("result_")
+        and file.endswith(".pdf")
+    ]
+
+    # Remove that PDF files
+    for file in pdf_files:
+        file_path = os.path.join(app.static_folder, file)
+        os.remove(file_path)
+
+
 if __name__ == "__main__":
     with app.app_context():
         # db.drop_all()
@@ -549,19 +564,6 @@ if __name__ == "__main__":
         # from misc import fill_sample_data
         # fill_sample_data(db)
 
-        # Find all old pdf files
-        pdf_files = [
-            file
-            for file in os.listdir(app.static_folder)
-            if file.startswith("variant_")
-            and file.endswith(".pdf")
-            or file.startswith("result_")
-            and file.endswith(".pdf")
-        ]
-
-        # Remove that PDF files
-        for file in pdf_files:
-            file_path = os.path.join(app.static_folder, file)
-            os.remove(file_path)
+        remove_old_pdfs()
 
     app.run(use_debugger=False, use_reloader=False, passthrough_errors=True)
