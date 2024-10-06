@@ -14,6 +14,7 @@ from models import (
     GenerationVariant,
 )
 from expressionism.generator import GeneratorSystem
+from expressionism.printer import Printer
 
 import json
 import os
@@ -473,9 +474,7 @@ def get_variant_document(variant_id):
     if variant_index is None:
         return server_msg("Вариант не найден", 404)
 
-    GeneratorSystem.create_variant_pdf(
-        json.loads(result.results), variant_index, file_path
-    )
+    Printer.create_variant_pdf(json.loads(result.results), variant_index, file_path)
 
     # ic(os.path.isfile(file_path + ".pdf"))
     # time.sleep(1)
@@ -511,7 +510,7 @@ def get_variant_answers_document(variant_id):
     if variant_index is None:
         return server_msg("Вариант не найден", 404)
 
-    GeneratorSystem.create_variant_answers_pdf(
+    Printer.create_variant_answers_pdf(
         json.loads(result.results), variant_index, file_path
     )
 
@@ -531,7 +530,7 @@ def export_result(result_id):
     if os.path.isfile(file_path + ".pdf"):
         return send_from_directory(app.static_folder, file_name + ".pdf")
 
-    GeneratorSystem.create_result_pdf(json.loads(result.results), file_path)
+    Printer.create_result_pdf(json.loads(result.results), file_path)
 
     return send_file(file_path + ".pdf")
 

@@ -1,39 +1,43 @@
-from enum import Enum
-from sympy import Expr, pprint, symbols, evaluate, nsimplify, expand, simplify, collect
+from sympy import (
+    Add,
+    Expr,
+    Limit,
+    Symbol,
+    evaluate,
+)
 
 from expressionism.graph import ExpressionGraph
 from icecream import ic
 import random
 
 
-class CoefficientType(Enum):
-    INTEGER = 0
-    FLOAT = 1
-
-
-class Coefficient:
-    def __init__(
-        self,
-        name: str,
-        type: CoefficientType,
-        min: int | float,
-        max: int | float,
-    ):
-        self.symbol = symbols(name)
-        self.type: CoefficientType = type
-        self.min: int | float = min
-        self.max: int | float = max
+class NumberCoefficient:
+    def __init__(self, name: str, min_value: int | float, max_value: int | float):
+        self.symbol = Symbol(name)
+        self.min: int | float = min_value
+        self.max: int | float = max_value
 
     def get_value(self) -> int | float:
-        if self.type == CoefficientType.INTEGER:
-            return random.randint(int(self.min), int(self.max))
-        elif self.type == CoefficientType.FLOAT:
-            return random.uniform(float(self.min), float(self.max))
-        else:
-            raise ValueError("Invalid coefficient type")
+        raise NotImplementedError("This method should be implemented by subclasses")
 
     def __repr__(self) -> str:
-        return f"Coefficient({self.symbol}, {self.type}, {self.min}, {self.max})"
+        return f"{self.__class__.__name__}({self.symbol}, {self.min}, {self.max})"
+
+
+class IntegerCoefficient(NumberCoefficient):
+    def __init__(self, name: str, min_value: int, max_value: int):
+        super().__init__(name, min_value, max_value)
+
+    def get_value(self) -> int:
+        return random.randint(self.min, self.max)
+
+
+class FloatCoefficient(NumberCoefficient):
+    def __init__(self, name: str, min_value: float, max_value: float):
+        super().__init__(name, min_value, max_value)
+
+    def get_value(self) -> float:
+        return random.uniform(self.min, self.max)
 
 
 class Expressionism:
@@ -53,13 +57,14 @@ class Expressionism:
 
         template = result_node.calc(graph)
 
-        pprint(template)
-
         return template
 
-    def concretization(self, template: Expr, coefficients: list[Coefficient]) -> Expr:
+    def concretization(
+        self, template: Expr, coefficients: list[NumberCoefficient]
+    ) -> Expr:
         concrete_expression = template
         with evaluate(False):
+            concrete_coefficients = []
             for c in coefficients:
                 c_value = 0
                 attempt = 0
@@ -68,10 +73,16 @@ class Expressionism:
                     attempt += 1
                     if attempt > 100:
                         raise ValueError(f"Cannot generate value for coefficient {c}")
-                concrete_expression = concrete_expression.subs(c.symbol, c_value)
-        ic(concrete_expression.atoms)
+                concrete_coefficients.append((c.symbol, c_value))
+            concrete_expression = concrete_expression.subs(concrete_coefficients)
+
+        # A little expression simplification
         if ic(len(concrete_expression.free_symbols)) > 0:
             ic("Expression simplified")
             concrete_expression = concrete_expression.simplify().evalf()
+        else:
+            concrete_expression = concrete_expression.replace(
+                lambda e: not isinstance(e, (Limit, Add)), lambda e: e.doit(deep=False)
+            )
 
         return concrete_expression

@@ -78,17 +78,15 @@ class JoinNode(Node):
 
         expr_1: Expr = expr_1_node.calc(graph)
         expr_2: Expr = expr_2_node.calc(graph)
-
         if operator == "+":
             return Add(expr_1, expr_2, evaluate=False)
         elif operator == "-":
-            return Add(expr_1, -1 * expr_2, evaluate=False)
+            return parse_expr(f"({str(expr_1)})-({str(expr_2)})", evaluate=False)
         elif operator == "*":
-            return Mul(expr_1, expr_2, evaluate=False)
+            return expand(Mul(expr_1, expr_2, evaluate=False), evaluate=False)
         elif operator == "/":
-            return Mul(expr_1, Pow(expr_2, -1, evaluate=False), evaluate=False)
-        else:
-            raise ValueError(f"Unknown operator: {operator}")
+            return parse_expr(f"({str(expr_1)})/({str(expr_2)})", evaluate=False)
+        raise ValueError(f"Unknown operator: {operator}")
 
 
 class SubstitutionNode(Node):
@@ -188,8 +186,8 @@ class LimitNode(Node):
             else expr_node2.calc(graph)
         )
 
-        limitVariable = ic(self.data["limitVariable"])
-        limitDir = ic(self.data["limitDir"])
+        limitVariable = self.data["limitVariable"]
+        limitDir = self.data["limitDir"]
 
         return Limit(sourceExpr, limitVariable, limitTarget, limitDir)
 
@@ -200,7 +198,7 @@ class BranchNode(Node):
 
     def calc(self, graph: ExpressionGraph) -> Expr:
         branches = self.data["branches"]
-        random_branch_index = ic(random.randint(0, len(branches) - 1))
+        random_branch_index = random.randint(0, len(branches) - 1)
 
         expr_node = graph.get_linked_node(self.id, f"branch-{random_branch_index}")
         expr: Expr = (
