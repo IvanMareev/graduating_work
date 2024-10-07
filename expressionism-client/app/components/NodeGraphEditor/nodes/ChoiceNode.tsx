@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { NodeProps, useReactFlow, useUpdateNodeInternals } from "reactflow";
+import { NodeProps, useHandleConnections, useReactFlow, useUpdateNodeInternals } from "@xyflow/react";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 import { CONDITION_NODES, ExpressionismNode } from "./types";
 
 const ChoiceNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
-    const { getNodes, setNodes } = useReactFlow();
+    const { getNodes, setNodes, getNode } = useReactFlow();
     const updateNodeInternals = useUpdateNodeInternals();
     const [branches, setBranches] = useState(["", ""]);
+    // const connections = useHandleConnections({})
 
     const setBranchesWrapper = (newBranches: string[]) => {
         setBranches(newBranches);

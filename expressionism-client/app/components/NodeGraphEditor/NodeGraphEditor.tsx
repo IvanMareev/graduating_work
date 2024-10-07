@@ -1,6 +1,32 @@
 import { apiActions } from "@/app/api/actions";
 import { fetcherGet } from "@/app/api/fetchers";
 import { Generator } from "@/app/types/model";
+import {
+    addEdge,
+    applyEdgeChanges,
+    applyNodeChanges,
+    Background,
+    BackgroundVariant,
+    Controls,
+    getConnectedEdges,
+    getOutgoers,
+    HandleType,
+    ReactFlow,
+    ReactFlowInstance,
+    ReactFlowJsonObject,
+    ReactFlowProvider,
+    reconnectEdge,
+    useReactFlow,
+    XYPosition,
+    type Edge,
+    type IsValidConnection,
+    type Node,
+    type NodeChange,
+    type OnConnect,
+    type OnEdgesChange,
+    type OnNodesChange,
+    type OnReconnect,
+} from "@xyflow/react";
 import { nanoid } from "nanoid/non-secure";
 import { ContextMenu } from "primereact/contextmenu";
 import {
@@ -14,26 +40,6 @@ import {
     useRef,
     useState,
 } from "react";
-import ReactFlow, {
-    addEdge,
-    Background,
-    BackgroundVariant,
-    Connection,
-    Controls,
-    Edge,
-    getConnectedEdges,
-    getOutgoers,
-    Node,
-    NodeChange,
-    ReactFlowInstance,
-    ReactFlowJsonObject,
-    ReactFlowProvider,
-    reconnectEdge,
-    useEdgesState,
-    useNodesState,
-    useReactFlow,
-    XYPosition,
-} from "reactflow";
 import useSWR from "swr";
 import { nodeGroups, nodeTypes } from "./nodes";
 import { IGNORE_NODES, NodeInfo } from "./nodes/types";
@@ -45,6 +51,14 @@ const getInitialNodes = () => {
 };
 
 const initialEdges: Edge[] = [];
+
+type OnReconnectStart = (
+    event: React.MouseEvent,
+    edge: Edge,
+    handleType: "source" | "target",
+) => void;
+
+type OnReconnectEnd = (event: MouseEvent | TouchEvent, edge: Edge, handleType: HandleType) => void;
 
 type NodeGraphEditorProps = {
     generatorId: number;
@@ -65,7 +79,7 @@ function createNode(type: string, data: object, nodePosition: XYPosition) {
 
 function getPaneContextItems(
     contextPanePosition: XYPosition,
-    setNodes: Dispatch<SetStateAction<Node<any, string | undefined>[]>>,
+    setNodes: Dispatch<SetStateAction<Node<any, string>[]>>,
 ) {
     const nodeTypesKeys = Object.keys(nodeTypes);
     return nodeGroups.map((group) => {
@@ -79,7 +93,7 @@ function getPaneContextItems(
                 return {
                     label: node.label,
                     command: () => {
-                        const newNode: Node = createNode(key, node.data || {}, contextPanePosition);
+                        const newNode = createNode(key, node.data || {}, contextPanePosition);
                         setNodes((nds) => nds.concat(newNode));
                     },
                 };
@@ -93,14 +107,14 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
         revalidateOnFocus: false,
     });
 
-    const edgeUpdateSuccessful = useRef(true);
+    const edgeReconnectSuccessful = useRef(true);
     const paneContextMenu = useRef<ContextMenu>(null);
     const nodeContextMenu = useRef<ContextMenu>(null);
 
     const { screenToFlowPosition, setViewport, getNode, getNodes, getEdges } = useReactFlow();
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes] = useState<Node[]>([]);
+    const [edges, setEdges] = useState<Edge[]>([]);
     const [contextNode, setContextNode] = useState<Node | null>(null);
     const [contextPanePosition, setContextPanePosition] = useState<XYPosition>({ x: 0, y: 0 });
 
@@ -175,13 +189,14 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
         }
     }, [data, setEdges, setNodes, setViewport]);
 
-    const isValidConnection = useCallback(
-        (connection: Connection) => {
+    const isValidConnection = useCallback<IsValidConnection>(
+        (connection) => {
             // we are using getNodes and getEdges helpers here
             // to make sure we create isValidConnection function only once
             const nodes = getNodes();
             const edges = getEdges();
             const target = nodes.find((node) => node.id === connection.target);
+            if (target == null) return false;
             const hasCycle = (node: Node, visited = new Set()) => {
                 if (visited.has(node.id)) return false;
 
@@ -192,54 +207,44 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
                     if (hasCycle(outgoer, visited)) return true;
                 }
             };
-            if (target == null) return false;
+
             if (target.id === connection.source) return false;
             return !hasCycle(target);
         },
         [getNodes, getEdges],
     );
 
-    const onConnect = useCallback(
-        (params: Edge | Connection) => {
-            setEdges((els) =>
-                els.filter(
-                    (e) => e.target !== params.target || e.targetHandle !== params.targetHandle,
-                ),
-            );
-            setEdges((els) => addEdge(params, els));
-        },
+    const onNodesChange: OnNodesChange = useCallback(
+        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+        [setNodes],
+    );
+
+    const onEdgesChange: OnEdgesChange = useCallback(
+        (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
         [setEdges],
     );
 
-    const onEdgeUpdateStart = useCallback(() => {
-        edgeUpdateSuccessful.current = false;
+    const onConnect: OnConnect = useCallback(
+        (connection) => setEdges((eds) => addEdge(connection, eds)),
+        [setEdges],
+    );
+
+    const onReconnectStart: OnReconnectStart = useCallback(() => {
+        edgeReconnectSuccessful.current = false;
     }, []);
 
-    const onEdgeUpdate = useCallback(
-        (oldEdge: Edge, newConnection: Connection) => {
-            edgeUpdateSuccessful.current = true;
-            setEdges((els) =>
-                els.filter(
-                    (e) =>
-                        e.target !== newConnection.target ||
-                        (e.targetHandle !== newConnection.targetHandle && e !== oldEdge),
-                ),
-            );
-            setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
-        },
-        [setEdges],
-    );
+    const onReconnect: OnReconnect = useCallback((oldEdge, newConnection) => {
+        edgeReconnectSuccessful.current = true;
+        setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+    }, []);
 
-    const onEdgeUpdateEnd = useCallback(
-        (_: any, edge: { id: string }) => {
-            if (!edgeUpdateSuccessful.current) {
-                setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-            }
+    const onReconnectEnd: OnReconnectEnd = useCallback((_, edge) => {
+        if (!edgeReconnectSuccessful.current) {
+            setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+        }
 
-            edgeUpdateSuccessful.current = true;
-        },
-        [setEdges],
-    );
+        edgeReconnectSuccessful.current = true;
+    }, []);
 
     const onPaneClick = useCallback((event: React.MouseEvent) => {
         paneContextMenu.current?.hide(event);
@@ -248,11 +253,11 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
     }, []);
 
     const onPaneContextMenu = useCallback(
-        (event: React.MouseEvent) => {
-            nodeContextMenu.current?.hide(event);
+        (event: MouseEvent | React.MouseEvent<Element, MouseEvent>) => {
+            nodeContextMenu.current?.hide(event as React.MouseEvent);
             setContextNode(null);
 
-            paneContextMenu.current?.show(event);
+            paneContextMenu.current?.show(event as React.MouseEvent);
 
             setContextPanePosition(screenToFlowPosition({ x: event.clientX, y: event.clientY }));
         },
@@ -316,13 +321,13 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
                 nodes={nodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
-                onConnect={onConnect}
                 isValidConnection={isValidConnection}
                 onNodesChange={handleNodesChange}
                 onEdgesChange={onEdgesChange}
-                onEdgeUpdateStart={onEdgeUpdateStart}
-                onEdgeUpdate={onEdgeUpdate}
-                onEdgeUpdateEnd={onEdgeUpdateEnd}
+                onConnect={onConnect}
+                onReconnectStart={onReconnectStart}
+                onReconnect={onReconnect}
+                onReconnectEnd={onReconnectEnd}
                 onPaneClick={onPaneClick}
                 onPaneContextMenu={onPaneContextMenu}
                 onNodeContextMenu={onNodeContextMenu}

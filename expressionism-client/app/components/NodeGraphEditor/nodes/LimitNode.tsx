@@ -1,6 +1,6 @@
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { ChangeEvent, useCallback, useState } from "react";
-import { NodeProps, useReactFlow } from "reactflow";
+import { NodeProps, useReactFlow } from "@xyflow/react";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { DropdownField, InputField } from "./fields";
 import { ExpressionismNode, LARGE_OPERATORS } from "./types";

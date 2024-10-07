@@ -10,11 +10,11 @@ import NodeGraphEditor, { NodeGraphRef } from "@/app/components/NodeGraphEditor/
 import { Generator, Topic } from "@/app/types/model";
 import { css, sva } from "@/styled-system/css";
 import { Box, Container } from "@/styled-system/jsx";
+import "@xyflow/react/dist/style.css";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { useEffect, useRef, useState } from "react";
-import "reactflow/dist/style.css";
 import useSWR from "swr";
 
 const pageStyles = sva({

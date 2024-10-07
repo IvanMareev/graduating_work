@@ -1,7 +1,7 @@
 import { cx, sva } from "@/styled-system/css";
 import { Box } from "@/styled-system/jsx";
 import React, { useCallback, useMemo } from "react";
-import { Handle, NodeProps, Position, useNodeId, useStore } from "reactflow";
+import { Connection, Handle, NodeProps, Position, useNodeId, useStore } from "@xyflow/react";
 
 export type HandleProps = {
     handleId: string;
@@ -9,6 +9,7 @@ export type HandleProps = {
     label?: string;
     children?: React.ReactNode;
     hideHandle?: boolean;
+    onConnect?: (connection: Connection) => void;
 };
 
 const InputHandle = (props: HandleProps) => {
@@ -31,6 +32,7 @@ const InputHandle = (props: HandleProps) => {
                 outline: "2px solid var(--colors-slate-light-9)",
                 background: "var(--colors-slate-light-1)",
             }}
+            onConnect={props.onConnect}
         />
     );
 

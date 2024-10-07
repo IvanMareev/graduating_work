@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react";
-import { NodeProps, useReactFlow } from "reactflow";
+import { NodeProps, useReactFlow } from "@xyflow/react";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 import { ExpressionismNode, FUNCTION_NODES } from "./types";

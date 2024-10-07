@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
-import { NodeProps, useReactFlow, useUpdateNodeInternals } from "reactflow";
+import { NodeProps, useReactFlow, useUpdateNodeInternals } from "@xyflow/react";
 import { BaseNode, InputHandle, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 import { CONDITION_NODES, ExpressionismNode } from "./types";

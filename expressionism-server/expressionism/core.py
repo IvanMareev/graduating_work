@@ -41,12 +41,6 @@ class FloatCoefficient(NumberCoefficient):
 
 
 class Expressionism:
-    def __init__(self):
-        pass
-
-    def expr(self, expr):
-        pass
-
     def build_expression_template(self, graph: ExpressionGraph):
         result_node = next(
             (node for node in graph.nodes if node.type == "result"), None

@@ -1,4 +1,4 @@
-import { NodeProps, useReactFlow } from "reactflow";
+import { NodeProps, useReactFlow } from "@xyflow/react";
 import { BaseNode, OutputHandle } from "./NodePrimitives";
 import { InputField } from "./fields";
 import { ExpressionismNode, MAIN_NODES } from "./types";
