@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import event
 from sqlalchemy.orm import Mapped, mapped_column
-
+from passlib.hash import bcrypt
 from config import db
 
 
@@ -222,3 +222,19 @@ def course_variant_default(*args, **kwargs):
     db.session.add(CourseVariant(discipline_id=1, name="2024"))  # 2
     db.session.commit()
     print("Course variants created!")
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
+
+    def set_password(self, password):
+        """Хэширует и сохраняет пароль."""
+        self.password_hash = bcrypt.hash(password)
+
+    def check_password(self, password):
+        """Проверяет правильность пароля."""
+        return bcrypt.verify(password, self.password_hash)

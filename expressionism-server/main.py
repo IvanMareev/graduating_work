@@ -1,6 +1,5 @@
 from flask import jsonify, request, send_from_directory, send_file
-
-from config import app, db
+from config import app, db, jwt
 from models import (
     Discipline,
     Section,
@@ -12,12 +11,14 @@ from models import (
     Task,
     GenerationResult,
     GenerationVariant,
+    User
 )
 from expressionism.generator import GeneratorSystem
 from expressionism.printer import Printer
-
+from auth_api.auth_api import auth_api_blueprint
 import json
 import os
+
 
 
 def server_msg(msg: str, code: int):
@@ -555,6 +556,8 @@ def remove_old_pdfs():
         os.remove(file_path)
 
 
+app.register_blueprint(auth_api_blueprint, url_prefix="/api/v1")
+
 if __name__ == "__main__":
     with app.app_context():
         # db.drop_all()
@@ -565,4 +568,4 @@ if __name__ == "__main__":
 
         remove_old_pdfs()
 
-    app.run(use_debugger=False, use_reloader=False, passthrough_errors=True)
+    app.run(debug=True, use_debugger=True, use_reloader=False, passthrough_errors=True)
