@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import event
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (
+    Integer, String, Date, Boolean, Text, ForeignKey, event
+)
+from sqlalchemy.orm import mapped_column, relationship, Mapped
 from passlib.hash import bcrypt
 from config import db
 
@@ -197,22 +199,82 @@ class GenerationVariant(db.Model):
     def to_json(self):
         return {"id": self.id}
 
+class TemplateModel(db.Model):
+    __tablename__ = "template"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String, nullable=True)
+
+    def __str__(self):
+        return self.name or f"Template #{self.id}"
+
+    def __repr__(self):
+        return f"<TemplateModel {self.id}>"
+
+
+
+class Lvl1(db.Model):
+    __tablename__ = "lvl1"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String, nullable=True)
+
+    def __str__(self):
+        return self.name or f"Lvl1 #{self.id}"
+
+    def __repr__(self):
+        return f"<Lvl1 {self.id}>"
+
+
+class TemplateLvl1(db.Model):
+    __tablename__ = "template_lvl1"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_id = mapped_column(Integer, ForeignKey("template.id"), nullable=True)
+    template = relationship("TemplateModel")
+
+    lvl1_id = mapped_column(Integer, ForeignKey("lvl1.id"), nullable=True)
+    lvl1 = relationship("Lvl1")
+
+    always_eat = mapped_column(Boolean, nullable=True)
+
+    def __str__(self):
+        tmpl = self.template.name if self.template else "None"
+        lvl = self.lvl1.name if self.lvl1 else "None"
+        return f"{tmpl} - {lvl}"
+
+    def __repr__(self):
+        return f"<TemplateLvl1 {self.id}>"
+
+
+class LayoutVariant1(db.Model):
+    __tablename__ = "layout_variant_1"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_lvl1_id = mapped_column(Integer, ForeignKey("template_lvl1.id"), nullable=True)
+    template_lvl1 = relationship("TemplateLvl1")
+
+    css_style = mapped_column(Text, nullable=False)
+    html = mapped_column(Text, nullable=False)
+
+    def __str__(self):
+        return f"Layout #{self.id} (TemplateLvl1 #{self.template_lvl1_id})"
+
+    def __repr__(self):
+        return f"<LayoutVariant1 {self.id}>"
+
 
 @event.listens_for(Discipline.__table__, "after_create")
 def disciplines_default(*args, **kwargs):
-    print("Creating default disciplines...")
     db.session.add(Discipline(name="Математический анализ"))
     db.session.commit()
-    print("Disciplines created!")
 
 
 @event.listens_for(TaskType.__table__, "after_create")
 def task_types_default(*args, **kwargs):
-    print("Creating default task types...")
     db.session.add(TaskType(name="ИДЗ"))
     db.session.add(TaskType(name="Контрольная работа"))
     db.session.commit()
-    print("Task types created!")
 
 
 @event.listens_for(CourseVariant.__table__, "after_create")
