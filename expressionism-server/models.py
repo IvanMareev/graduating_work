@@ -216,6 +216,7 @@ class Lvl1(db.Model):
     __tablename__ = "lvl1"
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String, nullable=True)
+    level = mapped_column(Integer, nullable=True, default=1)
 
     def __str__(self):
         return self.name or f"Lvl1 #{self.id}"
@@ -262,6 +263,116 @@ class LayoutVariant1(db.Model):
 
     def __repr__(self):
         return f"<LayoutVariant1 {self.id}>"
+    
+
+class Lvl2(db.Model):
+    __tablename__ = "lvl2"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String, nullable=True)
+
+    def __str__(self):
+        return self.name or f"Lvl2 #{self.id}"
+
+    def __repr__(self):
+        return f"<Lvl2 {self.id}>"
+
+
+class TemplateLvl2(db.Model):
+    __tablename__ = "template_lvl2"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_lvl1_id = mapped_column(Integer, ForeignKey("template_lvl1.id"), nullable=True)
+    template_lvl1 = relationship("TemplateLvl1")
+
+    lvl2_id = mapped_column(Integer, ForeignKey("lvl2.id"), nullable=True)
+    lvl2 = relationship("Lvl2")
+
+    max_count_y = mapped_column(Integer, nullable=True, default=1)
+    min_count_y = mapped_column(Integer, nullable=True)
+
+    max_count_x = mapped_column(Integer, nullable=True, default=1)
+    min_count_x = mapped_column(Integer, nullable=True, default=1)
+
+    always_eat = mapped_column(Boolean, nullable=True)
+
+    def __str__(self):
+        tmpl = self.template_lvl1.lvl1.name if self.template_lvl1 else "None"  # Здесь мы исправляем на template_lvl1
+        lvl = self.lvl2.name if self.lvl2 else "None"  # Здесь также заменили lvl1 на lvl2
+        return f"{tmpl} - {lvl}"
+
+    def __repr__(self):
+        return f"<TemplateLvl2 {self.id}>"
+
+
+class LayoutVariant2(db.Model):
+    __tablename__ = "layout_variant_2"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl2.id"), nullable=True)
+    template_lvl2 = relationship("TemplateLvl2")
+
+    css_style = mapped_column(Text, nullable=False)
+    html = mapped_column(Text, nullable=False)
+
+    def __str__(self):
+        return f"Layout #{self.id} (TemplateLvl2 #{self.template_lvl2_id})"
+
+    def __repr__(self):
+        return f"<LayoutVariant2 {self.id}>"
+
+
+class Lvl3(db.Model):
+    __tablename__ = "lvl3"
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String, nullable=True)
+
+    def __str__(self):
+        return self.name or f"Lvl3 #{self.id}"
+
+    def __repr__(self):
+        return f"<Lvl3 {self.id}>"
+
+
+class TemplateLvl3(db.Model):
+    __tablename__ = "template_lvl3"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl2.id"), nullable=True)
+    template_lvl2 = relationship("TemplateLvl2")
+
+    lvl3_id = mapped_column(Integer, ForeignKey("lvl3.id"), nullable=True)
+    lvl3 = relationship("Lvl3")
+
+    always_eat = mapped_column(Boolean, nullable=True)
+
+    def __str__(self):
+        tmpl = self.template_lvl2.lvl2.name if self.template_lvl2 else "None" 
+        lvl = self.lvl3.name if self.lvl3 else "None"  
+        return f"{tmpl} - {lvl}"
+
+    def __repr__(self):
+        return f"<TemplateLvl2 {self.id}>"
+
+
+class LayoutVariant3(db.Model):
+    __tablename__ = "layout_variant_3"
+
+    id = mapped_column(Integer, primary_key=True)
+
+    template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl3.id"), nullable=True)
+    template_lvl2 = relationship("TemplateLvl3")
+
+    css_style = mapped_column(Text, nullable=False)
+    html = mapped_column(Text, nullable=False)
+
+    def __str__(self):
+        return f"Layout #{self.id} (TemplateLvl3 #{self.template_lvl2_id})"
+
+    def __repr__(self):
+        return f"<LayoutVariant3 {self.id}>"
 
 
 @event.listens_for(Discipline.__table__, "after_create")

@@ -16,7 +16,14 @@ from models import (
     TemplateModel,
     Lvl1,
     TemplateLvl1,
-    LayoutVariant1
+    LayoutVariant1,
+    Lvl2,
+    TemplateLvl2,
+    LayoutVariant2,
+    Lvl3,
+    TemplateLvl3,
+    LayoutVariant3
+
 )
 from sqlalchemy import inspect
 
@@ -31,10 +38,18 @@ def init_admin():
     admin = Admin(app, name='Admin', template_mode='bootstrap4')
 
     # Категория для математического анализа
-    admin.add_view(ModelView(TemplateModel, db.session, category="генератор html"))
-    admin.add_view(ModelView(Lvl1, db.session, category="генератор html"))
-    admin.add_view(ModelView(LayoutVariant1, db.session, category="генератор html"))
-    admin.add_view(ChildView(TemplateLvl1, db.session, category="генератор html"))
+    admin.add_view(ModelView(TemplateModel, db.session, name="Шаблоны", category="Уровень 1 (Каркас)"))
+    admin.add_view(ModelView(Lvl1, db.session, name="Регистрация функциональных элементов", category="Уровень 1 (Каркас)"))
+    admin.add_view(ModelView(LayoutVariant1, db.session, name="Вариации вертски", category="Уровень 1 (Каркас)"))
+    admin.add_view(ModelView(TemplateLvl1, db.session,name="Связка шаблона и вариантов верстки", category="Уровень 1 (Каркас)"))
+
+    admin.add_view(ModelView(TemplateLvl2, db.session, name="Связка шаблона и вариантов функциональных элементов(связь с 1 уровнем)", category="Уровень 2 (Элементы)"))
+    admin.add_view(ModelView(Lvl2, db.session, name="Элементы", category="Уровень 2 (Элементы)"))
+    admin.add_view(ModelView(LayoutVariant2, db.session, name="Вариации верстки элементов", category="Уровень 2 (Элементы)"))
+
+    admin.add_view(ModelView(TemplateLvl3, db.session, name="Связка элемента и атомарной его части", category="Уровень 3 (Атомы)"))
+    admin.add_view(ModelView(Lvl3, db.session, name="Атомы", category="Уровень 3 (Атомы)"))
+    admin.add_view(ModelView(LayoutVariant3, db.session, name="Вариации верстки атомов", category="Уровень 3 (Атомы)"))
 
     # Категория для прочих моделей
     admin.add_view(ModelView(Discipline, db.session, category="Мат анализ"))
