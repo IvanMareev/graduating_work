@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: expressionism
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  expressionism-server:
+    build:
+      context: ./expressionism-server
+    command: bash -c "flask db upgrade && python main.py"
+    volumes:
+      - ./expressionism-server:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://myuser:mypassword@db/expressionism
+      FLASK_APP: main.py
+      FLASK_RUN_HOST: 0.0.0.0
+
+  expressionism-client:
+    build:
+      context: ./expressionism-client
+    command: yarn start
+    volumes:
+      - ./expressionism-client:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - expressionism-server
+
+volumes:
+  pgdata:

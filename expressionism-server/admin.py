@@ -1,5 +1,7 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.form.widgets import Select2Widget
+from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from config import app, db, jwt
 from models import (
     Discipline,
@@ -22,15 +24,42 @@ from models import (
     LayoutVariant2,
     Lvl3,
     TemplateLvl3,
-    LayoutVariant3
+    LayoutVariant3,
+    PlaceholderMatch,
+    PlaceholderMatchAtoms
 
 )
 from sqlalchemy import inspect
+
 
 class ChildView(ModelView):
     column_display_pk = True  # optional, but I like to see the IDs in the list
     column_hide_backrefs = False
     column_list = [c_attr.key for c_attr in inspect(TemplateLvl1).mapper.column_attrs]
+
+
+class PlaceholderMatchAdmin(ModelView):
+    form_overrides = {
+        'lvl2_items': QuerySelectMultipleField
+    }
+    form_args = {
+        'lvl2_items': {
+            'query_factory': lambda: db.session.query(Lvl2),  # ✅
+            'get_label': 'name'
+        }
+    }
+
+class PlaceholderMatchAtomsAdmin(ModelView):
+    form_overrides = {
+        'lvl3_items': QuerySelectMultipleField
+    }
+    form_args = {
+        'lvl3_items': {
+            'query_factory': lambda: db.session.query(Lvl3),  # ✅
+            'get_label': 'name'
+        }
+    }
+
 
 def init_admin():
     app.config['FLASK_ADMIN_SWATCH'] = 'lumen'
@@ -47,9 +76,13 @@ def init_admin():
     admin.add_view(ModelView(Lvl2, db.session, name="Элементы", category="Уровень 2 (Элементы)"))
     admin.add_view(ModelView(LayoutVariant2, db.session, name="Вариации верстки элементов", category="Уровень 2 (Элементы)"))
 
+    admin.add_view(PlaceholderMatchAdmin(PlaceholderMatch, db.session,name="Код лоцирования элементов в lvl1",category="Уровень 2 (Элементы)"))
+
     admin.add_view(ModelView(TemplateLvl3, db.session, name="Связка элемента и атомарной его части", category="Уровень 3 (Атомы)"))
     admin.add_view(ModelView(Lvl3, db.session, name="Атомы", category="Уровень 3 (Атомы)"))
     admin.add_view(ModelView(LayoutVariant3, db.session, name="Вариации верстки атомов", category="Уровень 3 (Атомы)"))
+
+    admin.add_view(PlaceholderMatchAtomsAdmin(PlaceholderMatchAtoms, db.session, name="Код лоцирования элементов в lvl2",category="Уровень 3 (Атомы)"))
 
     # Категория для прочих моделей
     admin.add_view(ModelView(Discipline, db.session, category="Мат анализ"))

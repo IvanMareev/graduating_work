@@ -41,7 +41,7 @@
         "@pandabox/prettier-plugin": "^0.1.2",
         "@pandacss/config": ">=0.36.1",
         "@pandacss/core": ">=0.36.1",
-        "@pandacss/dev": "^0.46.1",
+        "@pandacss/dev": "^0.53.4",
         "@pandacss/is-valid-prop": ">=0.36.1",
         "@pandacss/node": ">=0.36.1",
         "@pandacss/preset-base": ">=0.36.1",

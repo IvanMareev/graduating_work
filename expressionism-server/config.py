@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
 
+
 app = Flask(__name__)
 
 # Настройки приложения
@@ -16,10 +17,13 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 120  # 1 час
 
 
+
 # TODO вввести в эксплуатацию рефреш токен 
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 86400  # 1 день
 app.json.sort_keys = False
 app.debug = True
+
+
 
 # CORS и JWT
 CORS(app)
@@ -30,7 +34,6 @@ class Base(DeclarativeBase):
     pass
 
 db = SQLAlchemy(app, model_class=Base)
-migrate = Migrate(app, db)
 
 
 if __name__ == "__main__":

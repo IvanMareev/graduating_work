@@ -254,6 +254,7 @@ class LayoutVariant1(db.Model):
 
     template_lvl1_id = mapped_column(Integer, ForeignKey("template_lvl1.id"), nullable=True)
     template_lvl1 = relationship("TemplateLvl1")
+    is_active = mapped_column(Boolean, nullable=True)
 
     css_style = mapped_column(Text, nullable=False)
     html = mapped_column(Text, nullable=False)
@@ -297,7 +298,7 @@ class TemplateLvl2(db.Model):
     always_eat = mapped_column(Boolean, nullable=True)
 
     def __str__(self):
-        tmpl = self.template_lvl1.lvl1.name if self.template_lvl1 else "None"  # Здесь мы исправляем на template_lvl1
+        tmpl = self.template_lvl1.lvl1 if self.template_lvl1 else "None"  # Здесь мы исправляем на template_lvl1
         lvl = self.lvl2.name if self.lvl2 else "None"  # Здесь также заменили lvl1 на lvl2
         return f"{tmpl} - {lvl}"
 
@@ -313,6 +314,8 @@ class LayoutVariant2(db.Model):
     template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl2.id"), nullable=True)
     template_lvl2 = relationship("TemplateLvl2")
 
+    is_active = mapped_column(Boolean, nullable=True)
+
     css_style = mapped_column(Text, nullable=False)
     html = mapped_column(Text, nullable=False)
 
@@ -321,6 +324,32 @@ class LayoutVariant2(db.Model):
 
     def __repr__(self):
         return f"<LayoutVariant2 {self.id}>"
+
+
+placeholder_match_lvl2 = db.Table(
+    "placeholder_match_lvl2",
+    db.Column("placeholder_match_id", db.Integer, db.ForeignKey("placeholder_match.id")),
+    db.Column("lvl2_id", db.Integer, db.ForeignKey("lvl2.id"))
+)
+
+
+class PlaceholderMatch(db.Model):
+    __tablename__ = "placeholder_match"
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, nullable=False, unique=True)
+
+    lvl2_items = db.relationship(
+        "Lvl2",
+        secondary=placeholder_match_lvl2,
+        backref="placeholder_matches"
+    )
+    
+    def __str__(self):
+        return f"{self.code}"
+
+
+
 
 
 class Lvl3(db.Model):
@@ -335,6 +364,29 @@ class Lvl3(db.Model):
         return f"<Lvl3 {self.id}>"
 
 
+placeholder_match_lvl3 = db.Table(
+    "placeholder_match_lvl3",
+    db.Column("placeholder_match_atoms_id", db.Integer, db.ForeignKey("placeholder_match_atoms.id")),
+    db.Column("lvl3_id", db.Integer, db.ForeignKey("lvl3.id"))
+)
+
+
+class PlaceholderMatchAtoms(db.Model):
+    __tablename__ = "placeholder_match_atoms"
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, nullable=False, unique=True)
+
+    lvl3_items = db.relationship(
+        "Lvl3",
+        secondary=placeholder_match_lvl3,
+        backref="placeholder_matches_atoms"
+    )
+
+    def __str__(self):
+        return f"{self.code}"
+
+
 class TemplateLvl3(db.Model):
     __tablename__ = "template_lvl3"
 
@@ -343,14 +395,16 @@ class TemplateLvl3(db.Model):
     template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl2.id"), nullable=True)
     template_lvl2 = relationship("TemplateLvl2")
 
+    
+
     lvl3_id = mapped_column(Integer, ForeignKey("lvl3.id"), nullable=True)
     lvl3 = relationship("Lvl3")
 
     always_eat = mapped_column(Boolean, nullable=True)
 
     def __str__(self):
-        tmpl = self.template_lvl2.lvl2.name if self.template_lvl2 else "None" 
-        lvl = self.lvl3.name if self.lvl3 else "None"  
+        tmpl = self.template_lvl2 if self.template_lvl2 else "None" 
+        lvl = self.lvl3 if self.lvl3 else "None"  
         return f"{tmpl} - {lvl}"
 
     def __repr__(self):
@@ -364,6 +418,8 @@ class LayoutVariant3(db.Model):
 
     template_lvl2_id = mapped_column(Integer, ForeignKey("template_lvl3.id"), nullable=True)
     template_lvl2 = relationship("TemplateLvl3")
+
+    is_active = mapped_column(Boolean, nullable=True)
 
     css_style = mapped_column(Text, nullable=False)
     html = mapped_column(Text, nullable=False)
