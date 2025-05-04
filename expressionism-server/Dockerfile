@@ -22,4 +22,4 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY . .
 
 # При старте контейнера запустить сервер разработки.
-CMD ["python", "main.py", "run", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "config:app"] 
