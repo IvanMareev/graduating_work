@@ -19,6 +19,7 @@ jwt = JWTManager(app)
 with app.app_context():
     res = db.create_all()
     print("Таблицы созданы.", res)
+    
 
 
 

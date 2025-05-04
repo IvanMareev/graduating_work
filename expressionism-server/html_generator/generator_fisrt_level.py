@@ -3,7 +3,7 @@ from config import db
 from sqlalchemy import text
 from itertools import combinations, chain, product 
 from flask import Response
-
+from collections import defaultdict
 
 generate_first_level1_api_blueprint = Blueprint("generate_first_level1", __name__)
 
@@ -36,6 +36,31 @@ def get_first_level1(id):
     return (data)
 
 
+@generate_first_level1_api_blueprint.get("/get_first_level1_grouped/<int:id>")
+def get_first_level1_grouped(id):
+    sql = text('''
+        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id
+        FROM lvl1
+        JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
+        JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
+        WHERE template_lvl1.template_id = :id AND layout_variant_1.is_active
+    ''')
+    result = db.session.execute(sql, {"id": id})
+
+    grouped = defaultdict(list)
+
+    for row in result:
+        grouped[row.name].append({
+            'template_lvl1_id': row.template_lvl1_id,
+            "id": row.id,
+            "always_eat": row.always_eat,
+            "name": row.name,
+            "level": row.level,
+            "css_style": row.css_style,
+            "html": row.html
+        })
+
+    return jsonify(grouped)
 
 # TODO убрать дубликацию кода, заменить логику на get_wireframe_combinations
 @generate_first_level1_api_blueprint.get("/getting_all_wireframe_options/<int:id>")
