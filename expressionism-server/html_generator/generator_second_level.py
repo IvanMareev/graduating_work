@@ -6,6 +6,7 @@ from flask import Response
 from .generator_fisrt_level import get_wireframe_combinations, get_first_level1
 import copy
 import re
+from collections import defaultdict
 
 
 generate_second_level_api_blueprint = Blueprint("generate_second_level1", __name__)
@@ -21,7 +22,7 @@ def fetch_second_level_blocks(template_id):
         JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
         JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
         JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
-        WHERE template.id = :id AND layout_variant_2.is_active = 1
+        WHERE template.id = :id AND layout_variant_2.is_active
     ''')
 
     result = db.session.execute(sql, {"id": template_id})
@@ -42,6 +43,37 @@ def fetch_second_level_blocks(template_id):
 def get_second_level(id):
     data = fetch_second_level_blocks(id)
     return jsonify(data)
+
+
+@generate_second_level_api_blueprint.get("/get_second_level_grouped/<int:id>")
+def get_second_level_grouped(id):
+    sql = text('''
+        SELECT lvl2.name, layout_variant_2.css_style, layout_variant_2.html, 
+               template_lvl2.template_lvl1_id, placeholder_match.code
+        FROM template
+        JOIN template_lvl1 ON template_lvl1.template_id = template.id
+        JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
+        JOIN lvl2 ON template_lvl2.lvl2_id = lvl2.id
+        JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
+        JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
+        JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
+        WHERE template.id = :id AND layout_variant_2.is_active = 1
+    ''')
+
+    result = db.session.execute(sql, {"id": id})
+
+    grouped = defaultdict(list)
+
+    for row in result:
+        grouped[row.name].append({
+            "intersection_code": row.code,
+            "template_lvl1_id": row.template_lvl1_id,
+            "name": row.name,
+            "css_style": row.css_style,
+            "html": row.html
+        })
+
+    return jsonify(grouped)
 
 
 def get_wireframe_combinations_with_suggested_insertion_options(template_id):

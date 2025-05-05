@@ -4,7 +4,7 @@ import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import GeneratorFirstLevel from '@/app/htmlGenerator/GeneratorFirstLevel/page';
+import LevelGenerator from '@/app/htmlGenerator/LevelGenerator/page';
 import { Typography, CircularProgress, Paper } from '@mui/material';
 import readyMadeCombinationsServices from "@/app/services/firstLevelServices/readyMadeCombinationsServices";
 import HtmlCombinationPreview from '../components/HtmlCombinationPreview/HtmlCombinationPreview';
@@ -58,9 +58,7 @@ export default function BasicTabs() {
             </Box>
 
             <Box sx={{ p: 2 }}>
-              {value === 0 && <GeneratorFirstLevel />}
-              {value === 1 && <Typography>Редактор второго уровня</Typography>}
-              {value === 2 && <Typography>Редактор третьего уровня</Typography>}
+              <LevelGenerator level={value}/>
             </Box>
           </Box>
         </Panel>

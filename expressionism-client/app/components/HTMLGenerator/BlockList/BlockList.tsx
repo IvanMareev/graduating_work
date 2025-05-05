@@ -45,7 +45,6 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                     <Typography variant="subtitle1">ID: {block.id}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       Уровень: {block.level}, Always Eat: {block.always_eat ? '✔️' : '❌'}
-                      <Button variant="contained">Посмотреть код</Button>
                       <Button variant="outlined">Редактировать вариант</Button>
                     </Typography>
                     

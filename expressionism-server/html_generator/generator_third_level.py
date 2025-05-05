@@ -27,7 +27,7 @@ def fetch_third_level_blocks(template_id):
         JOIN layout_variant_3 ON layout_variant_3.template_lvl2_id = template_lvl3.id
         JOIN placeholder_match_lvl3 ON placeholder_match_lvl3.lvl3_id = lvl3.id
         JOIN placeholder_match_atoms ON placeholder_match_atoms.id = placeholder_match_lvl3.placeholder_match_atoms_id
-        WHERE template.id = :id AND layout_variant_3.is_active = 1
+        WHERE template.id = :id AND layout_variant_3.is_active
     ''')
 
     result = db.session.execute(sql, {"id": template_id})
