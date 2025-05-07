@@ -10,6 +10,7 @@ import {
   Box,
   Button
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 type Block = {
   id: number;
@@ -30,6 +31,8 @@ type BlockListProps = {
 };
 
 const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
+  const router = useRouter();
+
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       {Object.entries(blocks).map(([groupName, groupBlocks]) => (
@@ -45,7 +48,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                     <Typography variant="subtitle1">ID: {block.id}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       Уровень: {block.level}, Always Eat: {block.always_eat ? '✔️' : '❌'}
-                      <Button variant="outlined">Редактировать вариант</Button>
+                      <Button variant="outlined" onClick={()=>router.push(`/HtmlCssEditorPreview/${1}/${block.id}/`)}>Редактировать вариант</Button>
                     </Typography>
                     
 

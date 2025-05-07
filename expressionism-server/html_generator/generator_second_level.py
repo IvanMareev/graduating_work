@@ -79,7 +79,6 @@ def get_second_level_grouped(id):
 def get_wireframe_combinations_with_suggested_insertion_options(template_id):
     second_level_blocks = fetch_second_level_blocks(template_id)
     wireframe_combinations = get_wireframe_combinations(get_first_level1(template_id))
-    print("ds", wireframe_combinations)
 
     for combo in wireframe_combinations:
         for combo_element in combo:

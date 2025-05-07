@@ -42,15 +42,8 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
     setLoading(true);
     const loadData = async () => {
       try {
-        if (level === 1) {
-          const result = await groupedContainerServices(1, level);
-          setData(result);
-        } else if (level === 2) {
-          const result = await groupedContainerServices(1, level);
-          console.log('sasa',result);
-          
-          setData(result);
-        }
+        const result = await groupedContainerServices(1, level);
+        setData(result);
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
       } finally {
@@ -62,20 +55,18 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
   }, [level]);
 
   return (
-    <>
+    <div style={{ maxHeight: '100vh', overflowY: 'auto', padding: '1rem' }}>
       <h1>Шаг {level}. Генерация {level === 1 ? 'первого' : 'второго'} уровня</h1>
-      {
-        loading ? (
-    <p>Загрузка...</p>
-  ) : level === 1 ? (
-    <BlockList blocks={data as GroupedBlocks} />
-  ) : level === 2 ? (
-    <BlocksWithIntersectionOptions groups={data as GroupedBlockVariants} />
-  ) : (
-    <p>Неизвестный уровень: {level}</p>
-  )
-}
-    </>
+      {loading ? (
+        <p>Загрузка...</p>
+      ) : level === 1 ? (
+        <BlockList blocks={data as GroupedBlocks} />
+      ) : level === 2  || level === 3 ? (
+        <BlocksWithIntersectionOptions groups={data} level={level}/>
+      ) : (
+        <p>Неизвестный уровень: {level}</p>
+      )}
+    </div>
   );
 };
 

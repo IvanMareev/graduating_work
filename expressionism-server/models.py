@@ -446,11 +446,9 @@ def task_types_default(*args, **kwargs):
 
 @event.listens_for(CourseVariant.__table__, "after_create")
 def course_variant_default(*args, **kwargs):
-    print("Creating default course variants...")
     db.session.add(CourseVariant(discipline_id=1, name="2023"))  # 1
     db.session.add(CourseVariant(discipline_id=1, name="2024"))  # 2
     db.session.commit()
-    print("Course variants created!")
 
 
 class User(db.Model):

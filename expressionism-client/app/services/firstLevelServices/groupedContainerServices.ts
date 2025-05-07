@@ -10,7 +10,7 @@ export default async function groupedContainerServices(templateId: number, level
         } else if (level == 2) {
             response = await axios.get(`${API_BASE_URL}/get_wireframe_combinations_with_suggested_insertion_options/${templateId}`);
         } else if (level == 3) {
-            response = await axios.get(`${API_BASE_URL}/get_first_level1_grouped/${templateId}`);
+            response = await axios.get(`${API_BASE_URL}/get_wireframe_combinations_with_suggested_insertion_atoms_options/${templateId}`);
         }
 
         console.log(response);

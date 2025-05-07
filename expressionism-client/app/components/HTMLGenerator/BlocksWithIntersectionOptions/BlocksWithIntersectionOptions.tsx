@@ -7,8 +7,10 @@ import {
   Card,
   CardContent,
   Box,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 type InsertionOption = {
   css_style: string;
@@ -32,10 +34,24 @@ type Block = {
 type Group = Block[];
 
 type BlockGroupsProps = {
-  groups: Group[];
+  groups: unknown;
+  level:number; // временно any/unknown, чтобы сделать безопасную проверку
 };
 
-const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups }) => {
+const isValidGroups = (data: any): data is Group[] =>
+  Array.isArray(data) && data.every((group) => Array.isArray(group));
+
+const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups, level }) => {
+
+  const router = useRouter();
+  if (!isValidGroups(groups)) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box display="flex" flexDirection="column" gap={4}>
       {groups.map((group, index) => (
@@ -48,21 +64,22 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups }) =
               {group.map((block) => (
                 <Card key={block.id} variant="outlined">
                   <CardContent>
-                    <Typography variant="subtitle1">ID: {block.id} - {block.name}</Typography>
+                    <Typography variant="subtitle1">
+                      ID: {block.id} — {block.name}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Уровень: {block.level}, Always Eat: {block.always_eat ? '✔️' : '❌'}
-                      <Button size="small" variant="outlined" sx={{ ml: 2 }}>
-                        Редактировать вариант
-                      </Button>
                     </Typography>
 
-                    {/* Вставка CSS стилей */}
                     <style>{block.css_style}</style>
 
-                    {/* HTML превью */}
-                    <Box mt={2} p={2} border="1px solid #ccc" dangerouslySetInnerHTML={{ __html: block.html }} />
+                    <Box
+                      mt={2}
+                      p={2}
+                      border="1px solid #ccc"
+                      dangerouslySetInnerHTML={{ __html: block.html }}
+                    />
 
-                    {/* Вставки */}
                     {block.insertion_options.length > 0 && (
                       <Box mt={2} pl={2} borderLeft="2px solid #ddd">
                         <Typography variant="subtitle2">Вставки:</Typography>
@@ -70,6 +87,9 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups }) =
                           <Box key={idx} mt={1} p={1} border="1px dashed #aaa">
                             <Typography variant="body2">
                               Код вставки: {option.intersection_code}, Название: {option.name}
+                              <Button size="small" variant="outlined" sx={{ ml: 2 }} onClick={() => router.push(`/HtmlCssEditorPreview/${level}/${block.id}/`)}>
+                                Редактировать вариант
+                              </Button>
                             </Typography>
                             <style>{option.css_style}</style>
                             <Box mt={1} dangerouslySetInnerHTML={{ __html: option.html }} />

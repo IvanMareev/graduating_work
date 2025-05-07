@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, abort
 from config import db
 from models import Lvl3, PlaceholderMatchAtoms, TemplateLvl3, LayoutVariant3
 
-bp_element_third_level = Blueprint("lvl3", __name__, url_prefix="/lvl3")
+bp_element_third_level = Blueprint("lvl3", __name__)
 
 # ---- CRUD for Lvl3 ----
 @bp_element_third_level.route("/items", methods=["GET"])
@@ -129,6 +129,52 @@ def create_layout_variant_3():
     db.session.add(item)
     db.session.commit()
     return jsonify({"id": item.id}), 201
+
+@bp_element_third_level.route("/layout_variant_3/<int:layout_variant3_id>", methods=["PUT"])
+def update_layout_variant3(layout_variant3_id):
+    layout_variant3_item = LayoutVariant3.query.get(layout_variant3_id)
+    if not layout_variant3_item:
+        abort(404, description="LayoutVariant3 item not found")
+
+    data = request.get_json()
+    template_lvl2_id = data.get("template_lvl2_id", layout_variant3_item.template_lvl2_id)
+    is_active = data.get("is_active", layout_variant3_item.is_active)
+    css_style = data.get("css_style", layout_variant3_item.css_style)
+    html = data.get("html", layout_variant3_item.html)
+
+    # Проверка существования TemplateLvl3
+    template_lvl2 = TemplateLvl3.query.get(template_lvl2_id)
+    if not template_lvl2:
+        abort(400, description="Invalid template_lvl2_id")
+
+    # Обновление полей
+    layout_variant3_item.template_lvl2_id = template_lvl2_id
+    layout_variant3_item.is_active = is_active
+    layout_variant3_item.css_style = css_style
+    layout_variant3_item.html = html
+
+    db.session.commit()
+
+    return jsonify({
+        "id": layout_variant3_item.id,
+        "template_lvl2_id": layout_variant3_item.template_lvl2_id,
+        "is_active": layout_variant3_item.is_active,
+        "css_style": layout_variant3_item.css_style,
+        "html": layout_variant3_item.html
+    })
+
+@bp_element_third_level.route("/layout_variant_3/<int:layout_variant3_id>", methods=["GET"])
+def get_layout_variant3(layout_variant3_id):
+    layout_variant3_item = LayoutVariant3.query.get(layout_variant3_id)
+    if not layout_variant3_item:
+        abort(404, description="LayoutVariant3 not found")
+    return jsonify({
+        "id": layout_variant3_item.id,
+        "template_lvl3": layout_variant3_item.template_lvl2.id,
+        "is_active": layout_variant3_item.is_active,
+        "css_style": layout_variant3_item.css_style,
+        "html": layout_variant3_item.html
+    })
 
 @bp_element_third_level.route("/layout_variant_3/<int:item_id>", methods=["PUT"])
 def update_layout_variant_3(item_id):

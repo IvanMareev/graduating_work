@@ -325,7 +325,6 @@ def edit_course_variant(course_variant_id):
     if not course_variant:
         return server_msg("Вариант курса не найден", 404)
 
-    print(request.json)
     course_variant.name = request.json.get("name", course_variant.name)
     db.session.commit()
 
