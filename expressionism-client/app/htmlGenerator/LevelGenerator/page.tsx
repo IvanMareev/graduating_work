@@ -5,6 +5,7 @@ import BlocksWithIntersectionOptions from '@/app/components/HTMLGenerator/Blocks
 import groupedContainerServices from '@/app/services/firstLevelServices/groupedContainerServices';
 import groupedBlockVariantsService from '@/app/services/secondLevelServices/groupedBlockVariantsService';
 
+
 type Block = {
   id: number;
   name: string;

@@ -1,18 +1,21 @@
 "use client";
 
-import * as React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import LevelGenerator from '@/app/htmlGenerator/LevelGenerator/page';
-import { Typography, CircularProgress, Paper, Button } from '@mui/material';
-import readyMadeCombinationsServices from "@/app/services/firstLevelServices/readyMadeCombinationsServices";
-import HtmlCombinationPreview from '../components/HtmlCombinationPreview/HtmlCombinationPreview';
+import * as React from "react";
 import {
-  Panel,
-  PanelGroup,
-  PanelResizeHandle,
-} from "react-resizable-panels";
+  Tabs,
+  Tab,
+  Box,
+  Typography,
+  CircularProgress,
+  Paper,
+  Button,
+  Stack,
+} from "@mui/material";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import LevelGenerator from "@/app/htmlGenerator/LevelGenerator/page";
+import readyMadeCombinationsServices from "@/app/services/firstLevelServices/readyMadeCombinationsServices";
+import HtmlCombinationPreview from "../components/HtmlCombinationPreview/HtmlCombinationPreview";
+import { Settings, Play, Plus } from "lucide-react";
 
 export default function BasicTabs() {
   const [tabIndex, setTabIndex] = React.useState(0);
@@ -31,7 +34,7 @@ export default function BasicTabs() {
         const data = await readyMadeCombinationsServices(1, level);
         setBlocks(data);
       } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
+        console.error("Ошибка загрузки данных:", error);
       } finally {
         setLoading(false);
       }
@@ -41,42 +44,77 @@ export default function BasicTabs() {
   }, [level]);
 
   return (
-    <Box sx={{ height: '100vh' }}>
-      <PanelGroup direction="horizontal">
-        <Panel defaultSize={60} minSize={20}>
-          <Box sx={{ height: '100%', borderRight: 1, borderColor: 'divider' }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={tabIndex} onChange={handleChange} aria-label="tabs">
-                <Tab label="Первый Уровень" />
-                <Tab label="Второй Уровень" />
-                <Tab label="Третий Уровень" />
-                <Button variant="outlined" >Начать генерацию</Button>
-              </Tabs>
-            </Box>
+      <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+        <Box
+            sx={{
+              px: 2,
+              py: 1,
+              borderBottom: 1,
+              borderColor: "divider",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              backgroundColor: "#f9f9f9",
+            }}
+        >
+          <Tabs value={tabIndex} onChange={handleChange}>
+            <Tab label="1 уровень" />
+            <Tab label="2 уровень" />
+            <Tab label="3 уровень" />
+          </Tabs>
 
-            <Box sx={{ p: 2 }}>
+          <Stack direction="row" spacing={1}>
+            <Button
+                variant="contained"
+                startIcon={<Play size={18} />}
+                sx={{ textTransform: "none" }}
+            >
+              Генерация
+            </Button>
+            <Button
+                variant="outlined"
+                startIcon={<Settings size={18} />}
+                sx={{ textTransform: "none" }}
+            >
+              Админка
+            </Button>
+          </Stack>
+        </Box>
+
+        <PanelGroup direction="horizontal" style={{ flexGrow: 1 }}>
+          <Panel defaultSize={60} minSize={20}>
+            <Box sx={{ height: "100%", overflowY: "auto", p: 2 }}>
               <LevelGenerator level={level} />
             </Box>
-          </Box>
-        </Panel>
+          </Panel>
 
-        <PanelResizeHandle style={{ width: "5px", background: "#ccc", cursor: "col-resize" }} />
+          <PanelResizeHandle
+              style={{
+                width: "5px",
+                background: "#ddd",
+                cursor: "col-resize",
+              }}
+          />
 
-        <Panel defaultSize={40} minSize={20}>
-          <Box sx={{ p: 2, height: '100%', overflowY: 'auto' }}>
-            <Typography variant="h6" gutterBottom>Предпросмотр</Typography>
-            <Paper elevation={3} sx={{ p: 2, minHeight: '300px' }}>
-              {loading ? (
-                <CircularProgress />
-              ) : blocks ? (
-                <HtmlCombinationPreview blocks={blocks} />
-              ) : (
-                <Typography variant="body2">Нет данных для отображения</Typography>
-              )}
-            </Paper>
-          </Box>
-        </Panel>
-      </PanelGroup>
-    </Box>
+          <Panel defaultSize={40} minSize={20}>
+            <Box sx={{ p: 2, height: "100%", overflowY: "auto" }}>
+              <Typography variant="h6" gutterBottom>
+                Предпросмотр
+              </Typography>
+              <Paper elevation={3} sx={{ p: 2, minHeight: "300px" }}>
+                {loading ? (
+                    <CircularProgress />
+                ) : blocks ? (
+                    <HtmlCombinationPreview blocks={blocks} />
+                ) : (
+                    <Typography variant="body2">
+                      Нет данных для отображения
+                    </Typography>
+                )}
+              </Paper>
+            </Box>
+          </Panel>
+        </PanelGroup>
+      </Box>
   );
 }
