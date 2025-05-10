@@ -20,7 +20,7 @@ import React, { useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 import styles from "./BlockList.module.css";
 import createNewContainer from "@/app/services/firstLevelServices/createNewContainer";
-import {CreateContainerParams} from "@/app/types/lvl1";
+import { CreateContainerParams } from "@/app/types/lvl1";
 
 type Block = {
     id: number;
@@ -28,6 +28,7 @@ type Block = {
     level: number;
     html: string;
     css_style: string;
+    lvl_id: number;
     always_eat: boolean;
     template_lvl1_id: number;
 };
@@ -63,7 +64,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
 
         setnewBlockContent(updatedBlockContent);
         let res = await createNewContainer(updatedBlockContent);
-        
+
         router.push(`/HtmlCssEditorPreview/${1}/0?BlockID=${res.id}`)
         handleCloseModal();
     };
@@ -84,6 +85,14 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                     <AccordionSummary expandIcon={<ChevronDown size={18} />}>
                         <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
                             <Typography variant="h6">{groupName}</Typography>
+                            <Button
+                                variant="contained"
+                                startIcon={<Plus size={18} />}
+                                sx={{ textTransform: "none" }}
+                                onClick={() => router.push(`/HtmlCssEditorPreview/${1}/0?BlockID=${groupBlocks[0]['lvl_id']}`)}
+                            >
+                              Добавить вариант верстки контейнера 
+                            </Button>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>

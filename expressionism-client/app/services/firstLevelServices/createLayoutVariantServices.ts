@@ -43,7 +43,7 @@ export default async function createLayoutVariantServices(
       `${API_BASE_URL}${endpoint.template_lvl}/`,
       {
         template_id: level,                // передаем level вместо 1
-        lvl1_id: data.template_lvl1_id,     // передаем lvl1_id из данных
+        lvl1_id: data.lvl1_id,     // передаем lvl1_id из данных
         always_eat: 0                      // фиксированное значение
       },
       {
@@ -55,6 +55,8 @@ export default async function createLayoutVariantServices(
 
     // Получаем id из ответа
     const template_lvl_id = templateResponse.data.id;
+    console.log('template_lvl_id', template_lvl_id);
+    
 
     // 2. Создание layout_variant с использованием полученного template_lvl_id
     const layoutResponse = await axios.post<LayoutVariantType>(

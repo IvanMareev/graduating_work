@@ -49,7 +49,7 @@ def get_second_level(id):
 def get_second_level_grouped(id):
     sql = text('''
         SELECT lvl2.name, layout_variant_2.css_style, layout_variant_2.html, 
-               template_lvl2.template_lvl1_id, placeholder_match.code
+               template_lvl2.template_lvl1_id, placeholder_match.code, lvl2.id as lvl_id
         FROM template
         JOIN template_lvl1 ON template_lvl1.template_id = template.id
         JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
@@ -70,7 +70,8 @@ def get_second_level_grouped(id):
             "template_lvl1_id": row.template_lvl1_id,
             "name": row.name,
             "css_style": row.css_style,
-            "html": row.html
+            "html": row.html,
+            'lvl_id': row.lvl_id
         })
 
     return jsonify(grouped)

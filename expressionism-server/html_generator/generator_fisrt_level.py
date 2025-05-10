@@ -35,11 +35,11 @@ def get_first_level1(id):
 
     return (data)
 
-
+# TODO Сделать метод для выдачи неактивных элементов
 @generate_first_level1_api_blueprint.get("/get_first_level1_grouped/<int:id>")
 def get_first_level1_grouped(id):
     sql = text('''
-        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id
+        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id, lvl1.id as lvl_id
         FROM lvl1
         JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
         JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
@@ -51,13 +51,15 @@ def get_first_level1_grouped(id):
 
     for row in result:
         grouped[row.name].append({
+
             'template_lvl1_id': row.template_lvl1_id,
             "id": row.id,
             "always_eat": row.always_eat,
             "name": row.name,
             "level": row.level,
             "css_style": row.css_style,
-            "html": row.html
+            "html": row.html,
+            'lvl_id': row.lvl_id
         })
 
     return jsonify(grouped)

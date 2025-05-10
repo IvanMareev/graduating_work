@@ -61,7 +61,7 @@ const HtmlCssEditorPreview: React.FC = () => {
 
             const newVariant = {
                 ...layoutVariant,
-                'template_lvl1_id': 13
+                'lvl1_id': BlockID
             };
             console.log('dsf',newVariant);
             
