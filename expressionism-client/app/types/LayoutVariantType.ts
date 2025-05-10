@@ -5,4 +5,6 @@ export type LayoutVariantType = {
     is_active: boolean;
     template_lvl1: number;
   };
+
+
   

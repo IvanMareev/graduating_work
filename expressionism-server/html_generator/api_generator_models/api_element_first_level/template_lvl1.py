@@ -43,7 +43,19 @@ def create_template_lvl1():
     if not template or not lvl1:
         abort(400, description="Invalid template_id or lvl1_id")  # Проверяем, что объекты существуют
 
-    # Создаем новый объект TemplateLvl1
+    # Проверяем, существует ли уже объект с таким template_id и lvl1_id
+    existing_template_lvl1 = TemplateLvl1.query.filter_by(template_id=template_id, lvl1_id=lvl1_id).first()
+
+    if existing_template_lvl1:
+        # Если объект существует, возвращаем его данные
+        return jsonify({
+            "id": existing_template_lvl1.id,
+            "template": existing_template_lvl1.template.name,
+            "lvl1": existing_template_lvl1.lvl1.name,
+            "always_eat": existing_template_lvl1.always_eat
+        }), 200  # Возвращаем данные существующего объекта с кодом 200 (OK)
+
+    # Создаем новый объект TemplateLvl1, если такого еще нет
     new_template_lvl1 = TemplateLvl1(template_id=template_id, lvl1_id=lvl1_id, always_eat=always_eat)
     db.session.add(new_template_lvl1)  # Добавляем в сессию
     db.session.commit()  # Сохраняем изменения в базе данных

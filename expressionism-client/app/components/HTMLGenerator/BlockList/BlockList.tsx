@@ -19,6 +19,8 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 import styles from "./BlockList.module.css";
+import createNewContainer from "@/app/services/firstLevelServices/createNewContainer";
+import {CreateContainerParams} from "@/app/types/lvl1";
 
 type Block = {
     id: number;
@@ -42,7 +44,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
     const router = useRouter();
     const [openModal, setOpenModal] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-    const [newBlockName, setNewBlockName] = useState("");
+    const [newBlockContent, setnewBlockContent] = useState<CreateContainerParams | null>(null);
 
     const handleOpenModal = (groupName: string) => {
         setSelectedGroup(groupName);
@@ -51,30 +53,37 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
 
     const handleCloseModal = () => {
         setOpenModal(false);
-        setNewBlockName("");
     };
 
-    const handleAddBlock = () => {
-        // Здесь можно отправить данные на сервер
-        console.log("Добавить блок в группу:", selectedGroup, "с именем:", newBlockName);
+    const handleAddBlock = async () => {
+        const updatedBlockContent = {
+            ...newBlockContent,
+            level: 1
+        };
+
+        setnewBlockContent(updatedBlockContent);
+        let res = await createNewContainer(updatedBlockContent);
+        
+        router.push(`/HtmlCssEditorPreview/${1}/0?BlockID=${res.id}`)
         handleCloseModal();
     };
 
     return (
         <Box display="flex" flexDirection="column" gap={2}>
+            <Button
+                variant="contained"
+                startIcon={<Plus size={18} />}
+                sx={{ textTransform: "none" }}
+                onClick={() => handleOpenModal('')}
+            >
+                Добавить контейнер
+            </Button>
             {Object.entries(blocks).map(([groupName, groupBlocks]) => (
+
                 <Accordion key={groupName}>
                     <AccordionSummary expandIcon={<ChevronDown size={18} />}>
                         <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
                             <Typography variant="h6">{groupName}</Typography>
-                            <Button
-                                variant="contained"
-                                startIcon={<Plus size={18} />}
-                                sx={{ textTransform: "none" }}
-                                onClick={() => handleOpenModal(groupName)}
-                            >
-                                Добавить вариант
-                            </Button>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -119,20 +128,31 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
 
             {/* Модальное окно */}
             <Dialog open={openModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
-                <DialogTitle>Добавить вариант в «{selectedGroup}»</DialogTitle>
+                <DialogTitle>Добавить вариант</DialogTitle>
                 <DialogContent>
                     <TextField
                         fullWidth
                         label="Название блока"
-                        value={newBlockName}
-                        onChange={(e) => setNewBlockName(e.target.value)}
+                        onChange={(e) => setnewBlockContent((prev) => ({
+                            ...prev,
+                            containerName: e.target.value
+                        }))}
+                        margin="normal"
+                    />
+                    <TextField
+                        fullWidth
+                        label="Значение сортровки"
+                        onChange={(e) => setnewBlockContent((prev) => ({
+                            ...prev,
+                            physicalLevel: e.target.value
+                        }))}
                         margin="normal"
                     />
                     {/* Здесь можно добавить поля для html/css, если нужно */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal}>Отмена</Button>
-                    <Button onClick={handleAddBlock} variant="contained" disabled={!newBlockName.trim()}>
+                    <Button onClick={handleAddBlock} variant="contained" >
                         Сохранить
                     </Button>
                 </DialogActions>

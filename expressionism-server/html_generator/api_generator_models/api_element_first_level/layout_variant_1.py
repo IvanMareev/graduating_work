@@ -33,8 +33,10 @@ def get_layout_variant1(layout_variant1_id):
 # POST create new layout_variant_1 item
 @bp_layout_variant_1.route("/", methods=["POST"])
 def create_layout_variant1():
+    
     data = request.get_json()  # Получаем данные из запроса
-    template_lvl1_id = data.get("template_lvl1_id")
+    print('data', data)
+    template_lvl1_id = data.get("template_lvl_id")
     is_active = data.get("is_active")
     css_style = data.get("css_style")
     html = data.get("html")
