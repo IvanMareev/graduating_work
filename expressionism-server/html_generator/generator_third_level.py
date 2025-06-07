@@ -5,6 +5,7 @@ from itertools import combinations, chain
 from flask import Response
 from .generator_second_level import get_intersection_first_level, get_second_level
 import copy
+from collections import defaultdict
 
 
 generate_third_level_api_blueprint = Blueprint("generate_third_level", __name__)
@@ -227,3 +228,43 @@ def getting_all_wireframe_options_with_insertion_atoms(id):
 
     full_html += "</body></html>"
     return Response(full_html, mimetype='text/html')
+
+
+@generate_third_level_api_blueprint.get("/get_third_level_grouped/<int:id>")
+def get_third_level_grouped(id):
+    sql = text('''
+        SELECT
+            lvl3.name,
+            layout_variant_3.css_style,
+            layout_variant_3.html,
+            template_lvl3.template_lvl2_id,
+            template_lvl1.id AS template_lvl1_id,
+            placeholder_match_atoms.code,
+            lvl3.id AS lvl_id
+        FROM template
+        JOIN template_lvl1 ON template_lvl1.template_id = template.id
+        JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
+        JOIN template_lvl3 ON template_lvl3.template_lvl2_id = template_lvl2.id
+        JOIN lvl3 ON lvl3.id = template_lvl3.lvl3_id
+        JOIN layout_variant_3 ON layout_variant_3.template_lvl2_id = template_lvl3.id
+        JOIN placeholder_match_lvl3 ON placeholder_match_lvl3.lvl3_id = lvl3.id
+        JOIN placeholder_match_atoms ON placeholder_match_atoms.id = placeholder_match_lvl3.placeholder_match_atoms_id
+        WHERE template.id = :id AND layout_variant_3.is_active = TRUE
+    ''')
+
+    result = db.session.execute(sql, {"id": id})
+    
+    grouped = defaultdict(list)
+    
+    for row in result:
+        grouped[row.name].append({
+            "intersection_code": row.code,
+            "template_lvl1_id": row.template_lvl1_id,
+            "template_lvl2_id": row.template_lvl2_id,
+            "name": row.name,
+            "css_style": row.css_style,
+            "html": row.html,
+            "lvl_id": row.lvl_id
+        })
+    
+    return jsonify(grouped)

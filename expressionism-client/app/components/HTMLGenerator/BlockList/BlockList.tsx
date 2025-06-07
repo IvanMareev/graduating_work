@@ -86,7 +86,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
                 <Accordion key={groupName}>
                     <AccordionSummary expandIcon={<ChevronDown size={18} />}>
                         <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
-                            <Typography variant="h6">{groupName}</Typography>
+                            <Typography variant="h6"> {groupName}     ({groupBlocks[0].always_eat ? "Обязательно в макете" : "необязательно в макете"})</Typography>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -104,8 +104,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
                                     <CardContent>
                                         <Box display="flex" justifyContent="space-between" alignItems="center">
                                             <Typography variant="subtitle1">
-                                                ID: {block.id} | Уровень: {block.level} | Always Eat:{" "}
-                                                {block.always_eat ? "✔️" : "❌"}
+                                                ID: {block.id} | Уровень: {block.level}
                                             </Typography>
                                             <Button
                                                 variant="outlined"

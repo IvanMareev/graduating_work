@@ -175,28 +175,3 @@ def getting_all_wireframe_components(id):
     combinations = get_wireframe_combinations(all_components)
     return jsonify(combinations)
 
-
-# @generate_first_level1_api_blueprint.get("/get_third_level/<int:id>")
-# def get_third_level(id):
-#     sql = text('''
-#         SELECT lvl3.name, layout_variant_3.css_style, layout_variant_3.html
-#         FROM template
-#         JOIN template_lvl1 ON template_lvl1.template_id = template.id
-#         JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
-#         JOIN lvl2 ON template_lvl2.lvl2_id = lvl2.id
-#         JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
-#     ''')
-#     result = db.session.execute(sql, {"id": id})
-
-#     # Преобразуем результат в список словарей
-#     data = [
-#         {
-            
-#             "name": row.name,
-#             "css_style": row.css_style,
-#             "html": row.html
-#         }
-#         for row in result
-#     ]
-
-#     return jsonify(data)
