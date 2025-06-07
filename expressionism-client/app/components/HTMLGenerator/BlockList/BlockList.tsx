@@ -39,9 +39,10 @@ type GroupedBlocks = {
 
 type BlockListProps = {
     blocks: GroupedBlocks;
+    level: number
 };
 
-const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
+const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
     const router = useRouter();
     const [openModal, setOpenModal] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
@@ -59,13 +60,13 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
     const handleAddBlock = async () => {
         const updatedBlockContent = {
             ...newBlockContent,
-            level: 1
+            level: level
         };
 
         setnewBlockContent(updatedBlockContent);
         let res = await createNewContainer(updatedBlockContent);
 
-        router.push(`/HtmlCssEditorPreview/${1}/0?BlockID=${res.id}`)
+        router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${1}`)
         handleCloseModal();
     };
 
@@ -85,18 +86,18 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                     <AccordionSummary expandIcon={<ChevronDown size={18} />}>
                         <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
                             <Typography variant="h6">{groupName}</Typography>
-                            <Button
-                                variant="contained"
-                                startIcon={<Plus size={18} />}
-                                sx={{ textTransform: "none" }}
-                                onClick={() => router.push(`/HtmlCssEditorPreview/${1}/0?BlockID=${groupBlocks[0]['lvl_id']}`)}
-                            >
-                              Добавить вариант верстки контейнера 
-                            </Button>
                         </Box>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box display="flex" flexDirection="column" gap={2}>
+                            <Button
+                                variant="contained"
+                                startIcon={<Plus size={18} />}
+                                sx={{ textTransform: "none" }}
+                                onClick={() => router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${groupBlocks[0]['lvl_id']}&templateId=${1}`)}
+                            >
+                                Добавить вариант верстки контейнера
+                            </Button>
                             {groupBlocks.map((block) => (
                                 <Card key={block.id} variant="outlined">
                                     <CardContent>
@@ -148,7 +149,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                         }))}
                         margin="normal"
                     />
-                    <TextField
+                    {level == 1 && <TextField
                         fullWidth
                         label="Значение сортровки"
                         onChange={(e) => setnewBlockContent((prev) => ({
@@ -156,7 +157,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks }) => {
                             physicalLevel: e.target.value
                         }))}
                         margin="normal"
-                    />
+                    />}
                     {/* Здесь можно добавить поля для html/css, если нужно */}
                 </DialogContent>
                 <DialogActions>

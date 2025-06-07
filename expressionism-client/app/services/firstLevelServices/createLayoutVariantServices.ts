@@ -37,13 +37,19 @@ export default async function createLayoutVariantServices(
     throw new Error("Unsupported level");
   }
 
+  console.log('template_lvl', {
+    template_id: data.template_id,                // передаем level вместо 1
+    lvl_id: data.lvl_id,     // передаем lvl1_id из данных
+    always_eat: 0                      // фиксированное значение
+  });
+
   try {
     // 1. Создание template_lvl с переданными данными
     const templateResponse = await axios.post<{ id: number }>(
       `${API_BASE_URL}${endpoint.template_lvl}/`,
       {
-        template_id: level,                // передаем level вместо 1
-        lvl1_id: data.lvl1_id,     // передаем lvl1_id из данных
+        template_id: data.template_id,                // передаем level вместо 1
+        lvl_id: data.lvl_id,     // передаем lvl1_id из данных
         always_eat: 0                      // фиксированное значение
       },
       {
@@ -56,7 +62,7 @@ export default async function createLayoutVariantServices(
     // Получаем id из ответа
     const template_lvl_id = templateResponse.data.id;
     console.log('template_lvl_id', template_lvl_id);
-    
+
 
     // 2. Создание layout_variant с использованием полученного template_lvl_id
     const layoutResponse = await axios.post<LayoutVariantType>(

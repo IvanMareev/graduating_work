@@ -14,7 +14,7 @@ generate_second_level_api_blueprint = Blueprint("generate_second_level1", __name
 
 def fetch_second_level_blocks(template_id):
     sql = text('''
-        SELECT lvl2.name, layout_variant_2.css_style, layout_variant_2.html, template_lvl2.template_lvl1_id, placeholder_match.code
+        SELECT lvl2.name,lvl2.id as lvl2_id, layout_variant_2.css_style, layout_variant_2.html, template_lvl2.template_lvl1_id, placeholder_match.code
         FROM template
         JOIN template_lvl1 ON template_lvl1.template_id = template.id
         JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
@@ -33,7 +33,8 @@ def fetch_second_level_blocks(template_id):
             "template_lvl1_id": row.template_lvl1_id,
             "name": row.name,
             "css_style": row.css_style,
-            "html": row.html
+            "html": row.html,
+            "lvl2_id": row.lvl2_id
         }
         for row in result
     ]
@@ -57,7 +58,7 @@ def get_second_level_grouped(id):
         JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
         JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
         JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
-        WHERE template.id = :id AND layout_variant_2.is_active = 1
+        WHERE template.id = :id AND layout_variant_2.is_active = TRUE
     ''')
 
     result = db.session.execute(sql, {"id": id})

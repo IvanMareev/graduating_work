@@ -93,6 +93,51 @@ def get_template_lvl2(template_lvl2_id):
         "always_eat": template_lvl2_item.always_eat
     })
 
+@bp_element_second_level.route("/template_lvl2", methods=["POST"])
+def create_template_lvl2():
+    data = request.get_json()
+
+    template_lvl1_id = data.get("template_id")
+    lvl2_id = data.get("lvl_id")
+    always_eat = data.get("always_eat")
+
+    # Проверка существования связанных объектов
+    template_lvl1 = TemplateLvl1.query.get(template_lvl1_id)
+    lvl2 = Lvl2.query.get(lvl2_id)
+
+    if not template_lvl1 or not lvl2:
+        abort(400, description="Invalid template_lvl1_id or lvl2_id")
+
+    # Проверка существующего объекта
+    existing_template_lvl2 = TemplateLvl2.query.filter_by(
+        template_lvl1_id=template_lvl1_id,
+        lvl2_id=lvl2_id
+    ).first()
+
+    if existing_template_lvl2:
+        return jsonify({
+            "id": existing_template_lvl2.id,
+            "lvl2": existing_template_lvl2.lvl2.name,
+            "always_eat": existing_template_lvl2.always_eat
+        }), 200
+
+    # Создание нового объекта
+    new_template_lvl2 = TemplateLvl2(
+        template_lvl1_id=template_lvl1_id,
+        lvl2_id=lvl2_id,
+        always_eat=always_eat
+    )
+    db.session.add(new_template_lvl2)
+    db.session.commit()
+
+    return jsonify({
+        "id": new_template_lvl2.id,
+        "template_lvl1": str(new_template_lvl2.template_lvl1),
+        "lvl2": new_template_lvl2.lvl2.name,
+        "always_eat": new_template_lvl2.always_eat
+    }), 201
+
+
 # LayoutVariant2 CRUD
 @bp_element_second_level.route("/layout_variant_2", methods=["GET"])
 def get_all_layout_variant2():

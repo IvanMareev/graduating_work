@@ -4,6 +4,7 @@ import BlockList from '@/app/components/HTMLGenerator/BlockList/BlockList';
 import BlocksWithIntersectionOptions from '@/app/components/HTMLGenerator/BlocksWithIntersectionOptions/BlocksWithIntersectionOptions';
 import groupedContainerServices from '@/app/services/firstLevelServices/groupedContainerServices';
 import groupedBlockVariantsService from '@/app/services/secondLevelServices/groupedBlockVariantsService';
+import groupedContainerWireframeServices from '@/app/services/firstLevelServices/groupedContainerWireframeServices';
 
 
 type Block = {
@@ -37,14 +38,17 @@ type LevelGeneratorProps = {
 
 const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<GroupedBlocks | GroupedBlockVariants>({});
+  const [group, setGroup] = useState<GroupedBlocks | GroupedBlockVariants>({});
+  const [wireframe, setWireframe] = useState<any>({});
 
   useEffect(() => {
     setLoading(true);
     const loadData = async () => {
       try {
-        const result = await groupedContainerServices(1, level);
-        setData(result);
+        const groupedContainer = await groupedContainerServices(1, level);
+        const wireframe = await groupedContainerWireframeServices(1, level);
+        setGroup(groupedContainer);
+        setWireframe(wireframe)
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
       } finally {
@@ -61,9 +65,9 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
       {loading ? (
         <p>Загрузка...</p>
       ) : level === 1 ? (
-        <BlockList blocks={data as GroupedBlocks} />
-      ) : level === 2  || level === 3 ? (
-        <BlocksWithIntersectionOptions groups={data} level={level}/>
+        <BlockList blocks={group as GroupedBlocks} />
+      ) : level === 2 || level === 3 ? (
+        <BlocksWithIntersectionOptions wireframe={wireframe} groups={group} level={level} />
       ) : (
         <p>Неизвестный уровень: {level}</p>
       )}

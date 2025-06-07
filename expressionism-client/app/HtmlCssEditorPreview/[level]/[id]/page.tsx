@@ -53,6 +53,7 @@ const HtmlCssEditorPreview: React.FC = () => {
         }
         if (parseInt(id || '', 10) === 0) {
             const BlockID = searchParams.get('BlockID');
+            const template_id = searchParams.get('templateId');
 
             if (!BlockID) {
                 console.error('BlockID отсутствует в query-параметрах');
@@ -61,7 +62,8 @@ const HtmlCssEditorPreview: React.FC = () => {
 
             const newVariant = {
                 ...layoutVariant,
-                'lvl1_id': BlockID
+                'lvl_id': BlockID,
+                'template_id': template_id,
             };
             console.log('dsf',newVariant);
             

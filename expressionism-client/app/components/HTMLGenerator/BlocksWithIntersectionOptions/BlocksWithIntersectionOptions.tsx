@@ -1,24 +1,24 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  Card,
-  CardContent,
   Box,
   Button,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Tab,
+  Tabs,
+  TextField,
 } from '@mui/material';
+import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-type InsertionOption = {
-  css_style: string;
-  html: string;
-  intersection_code: string;
-  name: string;
-  template_lvl1_id: number;
-};
+import createNewContainer from '@/app/services/firstLevelServices/createNewContainer';
+import { CreateContainerParams } from '@/app/types/lvl1';
+import BlockGroupList from '@/app/components/HTMLGenerator/BlockGroupList/BlockGroupList.tsx';
+import BlockList from '../BlockList/BlockList';
 
 type Block = {
   id: number;
@@ -28,23 +28,27 @@ type Block = {
   css_style: string;
   always_eat: boolean;
   template_lvl1_id: number;
-  insertion_options: InsertionOption[];
+  insertion_options: any[];
 };
 
 type Group = Block[];
 
 type BlockGroupsProps = {
-  groups: unknown;
-  level:number; // временно any/unknown, чтобы сделать безопасную проверку
+  wireframe: unknown;
+  level: number;
+  groups: unknown
 };
 
 const isValidGroups = (data: any): data is Group[] =>
   Array.isArray(data) && data.every((group) => Array.isArray(group));
 
-const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups, level }) => {
-
+const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, groups, level }) => {
   const router = useRouter();
-  if (!isValidGroups(groups)) {
+  const [tabIndex, setTabIndex] = useState(0);
+  const [openModal, setOpenModal] = useState(false);
+  const [newBlockContent, setnewBlockContent] = useState<CreateContainerParams | null>(null);
+
+  if (!isValidGroups(wireframe)) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
         <CircularProgress />
@@ -52,58 +56,54 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ groups, lev
     );
   }
 
+  const handleAddBlock = async () => {
+    const updatedBlockContent = { ...newBlockContent, level };
+    setnewBlockContent(updatedBlockContent);
+    const res = await createNewContainer(updatedBlockContent);
+    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}`);
+    setOpenModal(false);
+  };
+
   return (
-    <Box display="flex" flexDirection="column" gap={4}>
-      {groups.map((group, index) => (
-        <Accordion key={index}>
-          <AccordionSummary expandIcon={'#'}>
-            <Typography variant="h6">Группа {index + 1}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box display="flex" flexDirection="column" gap={2}>
-              {group.map((block) => (
-                <Card key={block.id} variant="outlined">
-                  <CardContent>
-                    <Typography variant="subtitle1">
-                      ID: {block.id} — {block.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Уровень: {block.level}, Always Eat: {block.always_eat ? '✔️' : '❌'}
-                    </Typography>
+    <Box>
+      <Tabs value={tabIndex} onChange={(_, newIndex) => setTabIndex(newIndex)} sx={{ mb: 2 }}>
+        <Tab label="Готовые комбинации" />
+        <Tab label="Массив элементов второго уровня" />
+      </Tabs>
 
-                    <style>{block.css_style}</style>
+      {tabIndex === 0 && (
+        <>
+          <BlockGroupList wireframe={wireframe} level={level} />
+          <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
+            <DialogTitle>Добавить вариант</DialogTitle>
+            <DialogContent>
+              <TextField
+                fullWidth
+                label="Название блока"
+                onChange={(e) =>
+                  setnewBlockContent((prev) => ({
+                    ...prev,
+                    containerName: e.target.value,
+                  }))
+                }
+                margin="normal"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenModal(false)}>Отмена</Button>
+              <Button onClick={handleAddBlock} variant="contained">
+                Сохранить
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
 
-                    <Box
-                      mt={2}
-                      p={2}
-                      border="1px solid #ccc"
-                      dangerouslySetInnerHTML={{ __html: block.html }}
-                    />
-
-                    {block.insertion_options.length > 0 && (
-                      <Box mt={2} pl={2} borderLeft="2px solid #ddd">
-                        <Typography variant="subtitle2">Вставки:</Typography>
-                        {block.insertion_options.map((option, idx) => (
-                          <Box key={idx} mt={1} p={1} border="1px dashed #aaa">
-                            <Typography variant="body2">
-                              Код вставки: {option.intersection_code}, Название: {option.name}
-                              <Button size="small" variant="outlined" sx={{ ml: 2 }} onClick={() => router.push(`/HtmlCssEditorPreview/${level}/${block.id}/`)}>
-                                Редактировать вариант
-                              </Button>
-                            </Typography>
-                            <style>{option.css_style}</style>
-                            <Box mt={1} dangerouslySetInnerHTML={{ __html: option.html }} />
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+      {tabIndex === 1 && (
+        <Box mt={4} p={2} border="1px dashed gray" textAlign="center">
+          <BlockList blocks={groups}></BlockList>
+        </Box>
+      )}
     </Box>
   );
 };

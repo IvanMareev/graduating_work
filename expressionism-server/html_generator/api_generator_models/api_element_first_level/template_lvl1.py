@@ -33,7 +33,7 @@ def get_template_lvl1(template_lvl1_id):
 def create_template_lvl1():
     data = request.get_json()  # Получаем данные из запроса
     template_id = data.get("template_id")
-    lvl1_id = data.get("lvl1_id")
+    lvl1_id = data.get("lvl_id")
     always_eat = data.get("always_eat")
 
     # Получаем связанные объекты
