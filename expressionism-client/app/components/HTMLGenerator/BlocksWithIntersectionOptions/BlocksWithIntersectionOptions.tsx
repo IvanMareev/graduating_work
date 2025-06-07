@@ -101,7 +101,7 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
 
       {tabIndex === 1 && (
         <Box mt={4} p={2} border="1px dashed gray" textAlign="center">
-          <BlockList blocks={groups}></BlockList>
+          <BlockList blocks={groups} level={level}></BlockList>
         </Box>
       )}
     </Box>

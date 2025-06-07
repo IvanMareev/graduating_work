@@ -62,7 +62,8 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
             ...newBlockContent,
             level: level
         };
-
+        console.log('updatedBlockContent', updatedBlockContent);
+        
         setnewBlockContent(updatedBlockContent);
         let res = await createNewContainer(updatedBlockContent);
 
