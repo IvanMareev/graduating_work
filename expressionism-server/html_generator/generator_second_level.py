@@ -14,16 +14,23 @@ generate_second_level_api_blueprint = Blueprint("generate_second_level1", __name
 
 def fetch_second_level_blocks(template_id):
     sql = text('''
-        SELECT lvl2.name,lvl2.id as lvl2_id, layout_variant_2.css_style, layout_variant_2.html, template_lvl2.template_lvl1_id, placeholder_match.code
-        FROM template
-        JOIN template_lvl1 ON template_lvl1.template_id = template.id
-        JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
+        SELECT 
+            lvl2.name,
+            lvl2.id AS lvl2_id,
+            layout_variant_2.css_style,
+            layout_variant_2.html,
+            template_lvl2.template_lvl1_id,
+            placeholder_match.code
+        FROM layout_variant_2
+        JOIN template_lvl2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
         JOIN lvl2 ON template_lvl2.lvl2_id = lvl2.id
-        JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
-        JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
-        JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
-        WHERE template.id = :id AND layout_variant_2.is_active
+        JOIN template_lvl1 ON template_lvl2.template_lvl1_id = template_lvl1.id
+        JOIN template ON template_lvl1.template_id = template.id
+        LEFT JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
+        LEFT JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
+        WHERE layout_variant_2.is_active = true AND template.id = :id
     ''')
+
 
     result = db.session.execute(sql, {"id": template_id})
     
@@ -56,8 +63,8 @@ def get_second_level_grouped(id):
         JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
         JOIN lvl2 ON template_lvl2.lvl2_id = lvl2.id
         JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
-        JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
-        JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
+        LEFT JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
+        LEFT JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
         WHERE template.id = :id AND layout_variant_2.is_active = TRUE
     ''')
 
@@ -127,7 +134,7 @@ def get_intersection_first_level(id):
             placeholders = {
                 code: [opt for opt in insertion_options if opt["intersection_code"] == code]
                 for code in set(opt["intersection_code"] for opt in insertion_options)
-                if code in base_html
+                if code and isinstance(code, str) and code in base_html
             }
 
             # Если вставок нет — просто оставляем как есть

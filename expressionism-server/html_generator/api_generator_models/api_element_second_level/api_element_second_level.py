@@ -15,6 +15,7 @@ from models import (
     TaskGenerator,
     TaskType,
     Topic,
+    TemplateLvl1
 )
 
 bp_element_second_level = Blueprint("lvl2_crud", __name__)
@@ -195,6 +196,43 @@ def update_layout_variant2(layout_variant2_id):
         "css_style": layout_variant2_item.css_style,
         "html": layout_variant2_item.html
     })
+
+# POST create new layout_variant_2 item
+@bp_element_second_level.route("/layout_variant_2", methods=["POST"])
+def create_layout_variant2():
+    data = request.get_json()
+    print("data", data)
+
+    template_lvl2_id = data.get("template_lvl_id")
+    is_active = data.get("is_active", True)  # По умолчанию активный
+    css_style = data.get("css_style", "")
+    html = data.get("html", "")
+
+    # Проверка существования связанного TemplateLvl2
+    template_lvl2 = TemplateLvl2.query.get(template_lvl2_id)
+    if not template_lvl2:
+        abort(400, description="Invalid template_lvl2_id")
+
+    # Создание новой записи LayoutVariant2
+    new_layout_variant2 = LayoutVariant2(
+        template_lvl2_id=template_lvl2_id,
+        is_active=is_active,
+        css_style=css_style,
+        html=html
+    )
+
+    db.session.add(new_layout_variant2)
+    db.session.commit()
+
+    return jsonify({
+        "id": new_layout_variant2.id,
+        "template_lvl2_id": new_layout_variant2.template_lvl2_id,
+        "is_active": new_layout_variant2.is_active,
+        "css_style": new_layout_variant2.css_style,
+        "html": new_layout_variant2.html
+    }), 201
+
+
 
 # PlaceholderMatch CRUD
 @bp_element_second_level.route("/placeholder_match", methods=["GET"])

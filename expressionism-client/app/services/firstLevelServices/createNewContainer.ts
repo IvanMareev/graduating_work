@@ -33,7 +33,7 @@ export default async function createNewContainer({
     };
 
     try {
-        const response = await axios.post<LayoutVariantType>(`${API_BASE_URL}${endpoint}/`, data, {
+        const response = await axios.post<LayoutVariantType>(`${API_BASE_URL}${endpoint}`, data, {
             headers: {
                 "Content-Type": "application/json",
             },

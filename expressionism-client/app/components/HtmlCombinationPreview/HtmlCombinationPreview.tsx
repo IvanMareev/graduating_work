@@ -43,7 +43,7 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
     dots: true,
     infinite: false,
     speed: 300,
-    slidesToShow: 3,
+    slidesToShow: 4,
     slidesToScroll: 1,
     responsive: [
       {
@@ -63,10 +63,6 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Все комбинации Wireframe
-      </Typography>
-
       <Slider {...settings}>
         {allCombinations.map((combo) => (
           <Box key={combo.groupName} sx={{ px: 1 }}>
@@ -75,28 +71,27 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
               onClick={() => setOpenIndex(combo.index)}
               sx={{
                 width: '100%',
-                height: 100,
+                height: 130,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 p: 1,
                 textTransform: 'none',
-                whiteSpace: 'normal',
+                overflow: 'hidden', // убираем скроллы у кнопки
               }}
             >
-             
               <Box
                 sx={{
-                  flexGrow: 1,
                   width: '100%',
+                  height: '100%',
                   border: '1px solid #ccc',
                   borderRadius: '8px',
                   backgroundColor: '#fff',
-                  overflow: 'hidden',
                   pointerEvents: 'none',
-                  transform: 'scale(0.5)',
+                  transform: 'scale(0.8)',
                   transformOrigin: 'top center',
+                  overflow: 'hidden', // убираем скроллы у превью
                 }}
                 dangerouslySetInnerHTML={{
                   __html: `<style>${combo.css}</style>${combo.html}`,
@@ -106,6 +101,7 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
           </Box>
         ))}
       </Slider>
+
 
       {allCombinations.map((combo) => (
         <Modal

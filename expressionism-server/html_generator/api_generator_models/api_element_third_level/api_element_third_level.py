@@ -1,16 +1,16 @@
 from flask import Blueprint, jsonify, request, abort
 from config import db
-from models import Lvl3, PlaceholderMatchAtoms, TemplateLvl3, LayoutVariant3
+from models import Lvl3, PlaceholderMatchAtoms, TemplateLvl3, LayoutVariant3, TemplateLvl2
 
 bp_element_third_level = Blueprint("lvl3", __name__)
 
 # ---- CRUD for Lvl3 ----
-@bp_element_third_level.route("/items", methods=["GET"])
+@bp_element_third_level.route("/lvl3", methods=["GET"])
 def get_lvl3_items():
     items = Lvl3.query.all()
     return jsonify([{ "id": item.id, "name": item.name } for item in items])
 
-@bp_element_third_level.route("/items", methods=["POST"])
+@bp_element_third_level.route("/lvl3", methods=["POST"])
 def create_lvl3():
     data = request.get_json()
     item = Lvl3(name=data.get("name"))
@@ -18,7 +18,7 @@ def create_lvl3():
     db.session.commit()
     return jsonify({"id": item.id, "name": item.name}), 201
 
-@bp_element_third_level.route("/items/<int:item_id>", methods=["PUT"])
+@bp_element_third_level.route("/lvl3/<int:item_id>", methods=["PUT"])
 def update_lvl3(item_id):
     item = Lvl3.query.get_or_404(item_id)
     data = request.get_json()
@@ -26,7 +26,7 @@ def update_lvl3(item_id):
     db.session.commit()
     return jsonify({"id": item.id, "name": item.name})
 
-@bp_element_third_level.route("/items/<int:item_id>", methods=["DELETE"])
+@bp_element_third_level.route("/lvl3/<int:item_id>", methods=["DELETE"])
 def delete_lvl3(item_id):
     item = Lvl3.query.get_or_404(item_id)
     db.session.delete(item)
@@ -75,17 +75,6 @@ def get_template_lvl3():
         "always_eat": item.always_eat
     } for item in items])
 
-@bp_element_third_level.route("/template_lvl3", methods=["POST"])
-def create_template_lvl3():
-    data = request.get_json()
-    item = TemplateLvl3(
-        template_lvl2_id=data.get("template_lvl2_id"),
-        lvl3_id=data.get("lvl3_id"),
-        always_eat=data.get("always_eat")
-    )
-    db.session.add(item)
-    db.session.commit()
-    return jsonify({"id": item.id}), 201
 
 @bp_element_third_level.route("/template_lvl3/<int:item_id>", methods=["PUT"])
 def update_template_lvl3(item_id):
@@ -118,17 +107,39 @@ def get_layout_variant_3():
     } for item in items])
 
 @bp_element_third_level.route("/layout_variant_3", methods=["POST"])
-def create_layout_variant_3():
+def create_layout_variant3():
     data = request.get_json()
-    item = LayoutVariant3(
-        template_lvl2_id=data.get("template_lvl2_id"),
-        is_active=data.get("is_active"),
-        css_style=data["css_style"],
-        html=data["html"]
+    print("data", data)
+
+    template_lvl3_id = data.get("template_lvl_id")
+    is_active = data.get("is_active", True)  # По умолчанию True
+    css_style = data.get("css_style", "")
+    html = data.get("html", "")
+
+    # Проверка существования связанного TemplateLvl3
+    template_lvl3 = TemplateLvl3.query.get(template_lvl3_id)
+    if not template_lvl3:
+        abort(400, description="Invalid template_lvl3_id")
+
+    # Создание новой записи LayoutVariant3
+    new_layout_variant3 = LayoutVariant3(
+        template_lvl2_id=template_lvl3_id,  # поле называется template_lvl2_id в модели, но содержит ID от TemplateLvl3
+        is_active=is_active,
+        css_style=css_style,
+        html=html
     )
-    db.session.add(item)
+
+    db.session.add(new_layout_variant3)
     db.session.commit()
-    return jsonify({"id": item.id}), 201
+
+    return jsonify({
+        "id": new_layout_variant3.id,
+        "template_lvl3_id": new_layout_variant3.template_lvl2_id,  # возвращаем именно ID TemplateLvl3
+        "is_active": new_layout_variant3.is_active,
+        "css_style": new_layout_variant3.css_style,
+        "html": new_layout_variant3.html
+    }), 201
+
 
 @bp_element_third_level.route("/layout_variant_3/<int:layout_variant3_id>", methods=["PUT"])
 def update_layout_variant3(layout_variant3_id):
@@ -193,3 +204,50 @@ def delete_layout_variant_3(item_id):
     db.session.delete(item)
     db.session.commit()
     return jsonify({"message": f"LayoutVariant3 {item_id} deleted"})
+
+
+
+@bp_element_third_level.route("/template_lvl3", methods=["POST"])
+def create_template_lvl3():
+    data = request.get_json()
+
+    template_lvl2_id = data.get("template_id")
+    lvl3_id = data.get("lvl_id")
+    always_eat = data.get("always_eat")
+
+    # Проверка существования связанных объектов
+    template_lvl2 = TemplateLvl2.query.get(template_lvl2_id)
+    lvl3 = Lvl3.query.get(lvl3_id)
+
+    if not template_lvl2 or not lvl3:
+        abort(400, description="Invalid template_lvl2_id or lvl3_id")
+
+    # Проверка, существует ли уже такая связка
+    existing_template_lvl3 = TemplateLvl3.query.filter_by(
+        template_lvl2_id=template_lvl2_id,
+        lvl3_id=lvl3_id
+    ).first()
+
+    if existing_template_lvl3:
+        return jsonify({
+            "id": existing_template_lvl3.id,
+            "lvl3": existing_template_lvl3.lvl3.name,
+            "always_eat": existing_template_lvl3.always_eat
+        }), 200
+
+    # Создание нового объекта
+    new_template_lvl3 = TemplateLvl3(
+        template_lvl2_id=template_lvl2_id,
+        lvl3_id=lvl3_id,
+        always_eat=always_eat
+    )
+    db.session.add(new_template_lvl3)
+    db.session.commit()
+
+    return jsonify({
+        "id": new_template_lvl3.id,
+        "template_lvl2": str(new_template_lvl3.template_lvl2),
+        "lvl3": new_template_lvl3.lvl3.name,
+        "always_eat": new_template_lvl3.always_eat
+    }), 201
+

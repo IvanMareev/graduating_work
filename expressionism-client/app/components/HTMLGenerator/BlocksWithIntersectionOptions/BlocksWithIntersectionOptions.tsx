@@ -60,7 +60,7 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
     const updatedBlockContent = { ...newBlockContent, level };
     setnewBlockContent(updatedBlockContent);
     const res = await createNewContainer(updatedBlockContent);
-    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}`);
+    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res?.id ? String(res.id) : 0}`);
     setOpenModal(false);
   };
 

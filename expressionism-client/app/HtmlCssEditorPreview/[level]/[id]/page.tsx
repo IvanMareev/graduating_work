@@ -65,7 +65,7 @@ const HtmlCssEditorPreview: React.FC = () => {
                 'lvl_id': BlockID,
                 'template_id': template_id,
             };
-            console.log('dsf',newVariant);
+            console.log('newVariant',newVariant);
             
             await createLayoutVariantServices(newVariant, level);
         } else {

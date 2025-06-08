@@ -98,8 +98,8 @@ export default function BasicTabs() {
               borderColor: "divider",
               backgroundColor: "#fff",
               p: 2,
-              maxHeight: "40vh",
-              overflowY: "auto",
+              maxHeight: "110vh",
+              overflowY: "hidden",
             }}
           >
             <HtmlCombinationPreview blocks={blocks} />

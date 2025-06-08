@@ -13,7 +13,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 120
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = 86400
 
 db = SQLAlchemy(app)
-CORS(app)
+CORS(app, allow_headers="*", origins="*", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 jwt = JWTManager(app)
 
     
