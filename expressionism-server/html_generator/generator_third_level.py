@@ -249,6 +249,7 @@ def get_third_level_grouped(id):
             lvl3.id                                                AS lvl_id,
             layout_variant_3.css_style                             AS css_style,
             layout_variant_3.html                                  AS html,
+            layout_variant_3.id                                    AS layout_variant_3_id,
             template_lvl3.template_lvl2_id                         AS template_lvl2_id,
             template_lvl1.id                                       AS template_lvl1_id,
             placeholder_match_atoms.code                           AS intersection_code
@@ -277,6 +278,7 @@ def get_third_level_grouped(id):
 
     for row in result:
         grouped[row.name].append({
+            "id": row.layout_variant_3_id,
             "intersection_code": row.intersection_code,
             "template_lvl1_id": row.template_lvl1_id,
             "template_lvl2_id": row.template_lvl2_id,

@@ -5,15 +5,16 @@ from config import db  # Импортируем db для работы с баз
 bp_template_lvl1 = Blueprint("template_lvl1", __name__)
 
 # GET all template_lvl1 items
-@bp_template_lvl1.route("/", methods=["GET"])
+@bp_template_lvl1.route("", methods=["GET"])
 def get_all_template_lvl1():
-    template_lvl1_items = TemplateLvl1.query.all()  # Получаем все записи из таблицы
+    template_lvl1_items = TemplateLvl1.query.all()
     return jsonify([{
         "id": item.id,
-        "template": item.template.name if item.template else None,
-        "lvl1": item.lvl1.name if item.lvl1 else None,
+        "template_name": str(item),
+        "lvl": item.lvl1.name if item.lvl1 else None,
         "always_eat": item.always_eat
     } for item in template_lvl1_items])
+
 
 # GET one template_lvl1 item by ID
 @bp_template_lvl1.route("/<int:template_lvl1_id>", methods=["GET"])
@@ -29,7 +30,7 @@ def get_template_lvl1(template_lvl1_id):
     })
 
 # POST create new template_lvl1 item
-@bp_template_lvl1.route("/", methods=["POST"])
+@bp_template_lvl1.route("", methods=["POST"])
 def create_template_lvl1():
     data = request.get_json()  # Получаем данные из запроса
     template_id = data.get("template_id")

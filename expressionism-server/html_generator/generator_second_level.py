@@ -56,8 +56,14 @@ def get_second_level(id):
 @generate_second_level_api_blueprint.get("/get_second_level_grouped/<int:id>")
 def get_second_level_grouped(id):
     sql = text('''
-        SELECT lvl2.name, layout_variant_2.css_style, layout_variant_2.html, 
-               template_lvl2.template_lvl1_id, placeholder_match.code, lvl2.id as lvl_id
+        SELECT 
+            lvl2.name, 
+            layout_variant_2.css_style, 
+            layout_variant_2.html, 
+            layout_variant_2.id                         AS layout_variant_2_id,
+            template_lvl2.template_lvl1_id, 
+            placeholder_match.code, 
+            lvl2.id as lvl_id
         FROM template
         JOIN template_lvl1 ON template_lvl1.template_id = template.id
         JOIN template_lvl2 ON template_lvl2.template_lvl1_id = template_lvl1.id
@@ -74,6 +80,7 @@ def get_second_level_grouped(id):
 
     for row in result:
         grouped[row.name].append({
+            "id": row.layout_variant_2_id,
             "intersection_code": row.code,
             "template_lvl1_id": row.template_lvl1_id,
             "name": row.name,
@@ -85,27 +92,38 @@ def get_second_level_grouped(id):
     return jsonify(grouped)
 
 
+import re
+
 def get_wireframe_combinations_with_suggested_insertion_options(template_id):
-    second_level_blocks = fetch_second_level_blocks(template_id)
+    # Получаем блоки второго уровня с их intersection_code
+    second_level_blocks = fetch_second_level_blocks(template_id)  # каждый block должен содержать block["intersection_code"]
     wireframe_combinations = get_wireframe_combinations(get_first_level1(template_id))
 
     for combo in wireframe_combinations:
         for combo_element in combo:
-            # Находим template_lvl1_id текущего элемента
-            template_lvl1_id = combo_element.get("template_lvl1_id")
-            if template_lvl1_id is None:
+            html = combo_element.get("html", "")
+            if not html:
                 continue
 
-            # Ищем подходящие блоки второго уровня
+            # Собираем все intersection_code, упомянутые в HTML
+            found_codes = {
+                match.group(1)
+                for match in re.finditer(r"#([A-Z0-9_]+)#", html)
+            }
+
             matching_blocks = [
                 block for block in second_level_blocks
-                if block.get("template_lvl1_id") == template_lvl1_id
+                if str(block.get("intersection_code") or "").strip("#") in found_codes
             ]
 
-            # Добавляем их как опции вставки
+
+
+
+            # Добавляем подходящие блоки
             combo_element["insertion_options"] = matching_blocks
 
     return wireframe_combinations
+
 
 
 

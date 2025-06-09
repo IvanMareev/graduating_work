@@ -1,6 +1,6 @@
 import { LayoutVariantType } from "@/app/types/LayoutVariantType";
 import axios from "axios";
-import {CreateContainerParams} from "@/app/types/lvl1";
+import { CreateContainerParams } from "@/app/types/lvl1";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -29,7 +29,7 @@ export default async function createNewContainer({
 
     const data = {
         name: containerName,
-        ...(level === 1 && { physical_level: physicalLevel }),
+        ...(level === 1 && { level: physicalLevel }),
     };
 
     try {

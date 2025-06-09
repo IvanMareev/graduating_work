@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Typography, Box, Button, Modal } from '@mui/material';
+import { Typography, Box, Button, Modal, IconButton } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { ChevronLeft, ChevronRight, ViewQuilt as ViewQuiltIcon } from '@mui/icons-material';
 
 type Block = {
   id: number;
@@ -22,6 +23,48 @@ type HtmlCombinationPreviewProps = {
   blocks: GroupedBlocks;
 };
 
+const CustomPrevArrow = ({ onClick }: { onClick?: () => void }) => (
+  <IconButton
+    onClick={onClick}
+    sx={{
+      position: 'absolute',
+      top: '50%',
+      left: 0,
+      zIndex: 1,
+      transform: 'translateY(-50%)',
+      backgroundColor: 'white',
+      boxShadow: 1,
+      '&:hover': {
+        backgroundColor: 'grey.100',
+      },
+    }}
+    aria-label="Previous"
+  >
+    <ChevronLeft />
+  </IconButton>
+);
+
+const CustomNextArrow = ({ onClick }: { onClick?: () => void }) => (
+  <IconButton
+    onClick={onClick}
+    sx={{
+      position: 'absolute',
+      top: '50%',
+      right: 0,
+      zIndex: 1,
+      transform: 'translateY(-50%)',
+      backgroundColor: 'white',
+      boxShadow: 1,
+      '&:hover': {
+        backgroundColor: 'grey.100',
+      },
+    }}
+    aria-label="Next"
+  >
+    <ChevronRight />
+  </IconButton>
+);
+
 const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -40,29 +83,17 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
   });
 
   const settings = {
-    dots: true,
+    dots: false,
     infinite: false,
-    speed: 300,
-    slidesToShow: 4,
+    speed: 500,
+    slidesToShow: 3,
     slidesToScroll: 1,
-    responsive: [
-      {
-        breakpoint: 900,
-        settings: {
-          slidesToShow: 2,
-        }
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-        }
-      }
-    ]
+    nextArrow: <CustomNextArrow />,
+    prevArrow: <CustomPrevArrow />,
   };
 
   return (
-    <Box>
+    <Box sx={{ position: 'relative', width: '100%' }}>
       <Slider {...settings}>
         {allCombinations.map((combo) => (
           <Box key={combo.groupName} sx={{ px: 1 }}>
@@ -70,28 +101,31 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
               variant="outlined"
               onClick={() => setOpenIndex(combo.index)}
               sx={{
-                width: '100%',
-                height: 130,
+                width: 160,
+                height: 160,
+                p: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                p: 1,
+                justifyContent: 'flex-start',
                 textTransform: 'none',
-                overflow: 'hidden', // убираем скроллы у кнопки
+                borderRadius: 2,
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
+              <ViewQuiltIcon sx={{ fontSize: 28, color: 'primary.main', mb: 1 }} />
               <Box
                 sx={{
                   width: '100%',
                   height: '100%',
                   border: '1px solid #ccc',
-                  borderRadius: '8px',
+                  borderRadius: 1,
                   backgroundColor: '#fff',
                   pointerEvents: 'none',
                   transform: 'scale(0.8)',
                   transformOrigin: 'top center',
-                  overflow: 'hidden', // убираем скроллы у превью
+                  overflow: 'hidden',
                 }}
                 dangerouslySetInnerHTML={{
                   __html: `<style>${combo.css}</style>${combo.html}`,
@@ -101,7 +135,6 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
           </Box>
         ))}
       </Slider>
-
 
       {allCombinations.map((combo) => (
         <Modal

@@ -14,13 +14,18 @@ import {
     DialogTitle,
     TextField,
     Typography,
+    FormControl,
+    MenuItem,
+    Select,
+    InputLabel
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 import styles from "./BlockList.module.css";
 import createNewContainer from "@/app/services/firstLevelServices/createNewContainer";
 import { CreateContainerParams } from "@/app/types/lvl1";
+import getTemplateLvlTableServices from "@/app/services/firstLevelServices/getTemplateLvlTableServices";
 
 type Block = {
     id: number;
@@ -47,6 +52,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
     const [openModal, setOpenModal] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
     const [newBlockContent, setnewBlockContent] = useState<CreateContainerParams | null>(null);
+    const [templateOptions, setTemplateOptions] = useState<any>();
 
     const handleOpenModal = (groupName: string) => {
         setSelectedGroup(groupName);
@@ -63,13 +69,37 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
             level: level
         };
         console.log('updatedBlockContent', updatedBlockContent);
-        
+
         setnewBlockContent(updatedBlockContent);
         let res = await createNewContainer(updatedBlockContent);
 
-        router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${1}`)
+        router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${newBlockContent['template_lvl_id'] || 1}`)
         handleCloseModal();
     };
+
+    useEffect(() => {
+        if (openModal && level != 1) {
+
+            getTemplateLvlTableServices(level - 1).then((data) => {
+                console.log('templateOptions_data', data);
+                if (Array.isArray(data)) {
+                    setTemplateOptions(data);
+                }
+            });
+            console.log('templateOptions', templateOptions);
+        }
+    }, [openModal, level]);
+    console.log("BLockLIST", blocks);
+
+
+    console.log(
+        'Block IDs by group:',
+        Object.entries(blocks).map(([groupName, groupBlocks]) => ({
+            groupName,
+            ids: groupBlocks.map((b) => b.id),
+        }))
+    );
+
 
     return (
         <Box display="flex" flexDirection="column" gap={2}>
@@ -104,12 +134,12 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
                                     <CardContent>
                                         <Box display="flex" justifyContent="space-between" alignItems="center">
                                             <Typography variant="subtitle1">
-                                                ID: {block.id} | Уровень: {block.level}
+                                                ID: {block.id}
                                             </Typography>
                                             <Button
                                                 variant="outlined"
                                                 onClick={() =>
-                                                    router.push(`/HtmlCssEditorPreview/${1}/${block.id}/`)
+                                                    router.push(`/HtmlCssEditorPreview/${level}/${block.id}/`)
                                                 }
                                             >
                                                 Редактировать
@@ -158,7 +188,29 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level }) => {
                         }))}
                         margin="normal"
                     />}
-                    {/* Здесь можно добавить поля для html/css, если нужно */}
+                    {level != 1 && (
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel>Выберите с каким компонентом связать контейнер</InputLabel>
+                            <Select
+                                value={newBlockContent?.template_lvl_id || ""}
+                                label="Template"
+                                onChange={(e) =>
+                                    setnewBlockContent((prev) => ({
+                                        ...prev,
+                                        template_lvl_id: e.target.value
+                                    }))
+                                }
+                            >
+                                {templateOptions?.map((tpl) => (
+                                    <MenuItem key={tpl.id} value={tpl.id}>
+                                        {tpl.template_name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    )}
+
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal}>Отмена</Button>

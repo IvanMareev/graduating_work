@@ -5,7 +5,7 @@ from config import db  # Импортируем db для работы с баз
 bp_layout_variant_1 = Blueprint("layout_variant_1", __name__)
 
 # GET all layout_variant_1 items
-@bp_layout_variant_1.route("/", methods=["GET"])
+@bp_layout_variant_1.route("", methods=["GET"])
 def get_all_layout_variant1():
     layout_variant1_items = LayoutVariant1.query.all()  # Получаем все записи из таблицы
     return jsonify([{
@@ -31,7 +31,7 @@ def get_layout_variant1(layout_variant1_id):
     })
 
 # POST create new layout_variant_1 item
-@bp_layout_variant_1.route("/", methods=["POST"])
+@bp_layout_variant_1.route("", methods=["POST"])
 def create_layout_variant1():
     
     data = request.get_json()  # Получаем данные из запроса

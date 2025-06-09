@@ -6,7 +6,7 @@ from config import db  # Импортируем db для работы с баз
 bp_lvl1 = Blueprint("lvl1", __name__)
 
 # GET all lvl1 items
-@bp_lvl1.route("/", methods=["GET"])
+@bp_lvl1.route("", methods=["GET"])
 def get_all_lvl1():
     lvl1_items = Lvl1.query.all()  # Получаем все записи из таблицы
     return jsonify([{"id": item.id, "name": item.name, "level": item.level} for item in lvl1_items])
@@ -20,7 +20,7 @@ def get_lvl1(lvl1_id):
     return jsonify({"id": lvl1_item.id, "name": lvl1_item.name, "level": lvl1_item.level})
 
 # POST create new lvl1 item
-@bp_lvl1.route("/", methods=["POST"])
+@bp_lvl1.route("", methods=["POST"])
 def create_lvl1():
     data = request.get_json()  # Получаем данные из запроса
     name = data.get("name")

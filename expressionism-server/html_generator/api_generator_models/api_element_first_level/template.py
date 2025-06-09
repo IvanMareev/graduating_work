@@ -5,7 +5,7 @@ from config import db
 bp = Blueprint("template", __name__)
 
 # GET all templates
-@bp.route("/", methods=["GET"])
+@bp.route("", methods=["GET"])
 def get_all_templates():
     templates = TemplateModel.query.all()
     return jsonify([{"id": t.id, "name": t.name} for t in templates])
@@ -19,7 +19,7 @@ def get_template(template_id):
     return jsonify({"id": template.id, "name": template.name})
 
 # POST create template
-@bp.route("/", methods=["POST"])
+@bp.route("", methods=["POST"])
 def create_template():
     data = request.get_json()
     name = data.get("name")

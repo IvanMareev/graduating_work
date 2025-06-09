@@ -69,12 +69,8 @@ def get_all_template_lvl2():
     template_lvl2_items = TemplateLvl2.query.all()
     return jsonify([{
         "id": item.id,
-        "template_lvl1": item.template_lvl1.id if item.template_lvl1 else None,
-        "lvl2": item.lvl2.id if item.lvl2 else None,
-        "max_count_y": item.max_count_y,
-        "min_count_y": item.min_count_y,
-        "max_count_x": item.max_count_x,
-        "min_count_x": item.min_count_x,
+        "template_name": str(item),
+        "lvl": item.lvl2.id if item.lvl2 else None,
         "always_eat": item.always_eat
     } for item in template_lvl2_items])
 

@@ -13,10 +13,11 @@ def get_lvl3_items():
 @bp_element_third_level.route("/lvl3", methods=["POST"])
 def create_lvl3():
     data = request.get_json()
-    item = Lvl3(name=data.get("name"))
-    db.session.add(item)
+    name = data.get("name")
+    new_lvl3 = Lvl3(name=name)
+    db.session.add(new_lvl3)
     db.session.commit()
-    return jsonify({"id": item.id, "name": item.name}), 201
+    return jsonify({"id": new_lvl3.id, "name": new_lvl3.name}), 201
 
 @bp_element_third_level.route("/lvl3/<int:item_id>", methods=["PUT"])
 def update_lvl3(item_id):
@@ -70,8 +71,8 @@ def get_template_lvl3():
     items = TemplateLvl3.query.all()
     return jsonify([{
         "id": item.id,
-        "template_lvl2_id": item.template_lvl2_id,
-        "lvl3_id": item.lvl3_id,
+        "template_name": str(item),
+        "lvl": item.lvl3_id,
         "always_eat": item.always_eat
     } for item in items])
 
@@ -210,7 +211,6 @@ def delete_layout_variant_3(item_id):
 @bp_element_third_level.route("/template_lvl3", methods=["POST"])
 def create_template_lvl3():
     data = request.get_json()
-
     template_lvl2_id = data.get("template_id")
     lvl3_id = data.get("lvl_id")
     always_eat = data.get("always_eat")
@@ -219,12 +219,18 @@ def create_template_lvl3():
     template_lvl2 = TemplateLvl2.query.get(template_lvl2_id)
     lvl3 = Lvl3.query.get(lvl3_id)
 
-    if not template_lvl2 or not lvl3:
-        abort(400, description="Invalid template_lvl2_id or lvl3_id")
+    # Если template_lvl2_id неверен, выбрать первый доступный template_lvl2
+    if not template_lvl2:
+        template_lvl2 = TemplateLvl2.query.first()
+        if not template_lvl2:
+            abort(400, description="No TemplateLvl2 objects available")
+
+    if not lvl3:
+        abort(400, description="Invalid lvl3_id")
 
     # Проверка, существует ли уже такая связка
     existing_template_lvl3 = TemplateLvl3.query.filter_by(
-        template_lvl2_id=template_lvl2_id,
+        template_lvl2_id=template_lvl2.id,
         lvl3_id=lvl3_id
     ).first()
 
@@ -237,7 +243,7 @@ def create_template_lvl3():
 
     # Создание нового объекта
     new_template_lvl3 = TemplateLvl3(
-        template_lvl2_id=template_lvl2_id,
+        template_lvl2_id=template_lvl2.id,
         lvl3_id=lvl3_id,
         always_eat=always_eat
     )
@@ -250,4 +256,5 @@ def create_template_lvl3():
         "lvl3": new_template_lvl3.lvl3.name,
         "always_eat": new_template_lvl3.always_eat
     }), 201
+
 
