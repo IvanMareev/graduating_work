@@ -135,6 +135,15 @@ def create_template_lvl2():
     }), 201
 
 
+@bp_element_second_level.route("/template_lvl2_set_persent/<int:item_id>", methods=["PUT"])
+def set_persent_template_lvl2(item_id):
+    item = TemplateLvl2.query.get_or_404(item_id)
+    data = request.get_json()
+    item.always_eat = data.get("always_eat", item.always_eat)
+    db.session.commit()
+    return jsonify({"id": item.id})
+
+
 # LayoutVariant2 CRUD
 @bp_element_second_level.route("/layout_variant_2", methods=["GET"])
 def get_all_layout_variant2():

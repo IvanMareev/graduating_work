@@ -100,6 +100,15 @@ def update_template_lvl1(template_lvl1_id):
         "always_eat": template_lvl1_item.always_eat
     })
 
+
+@bp_template_lvl1.route("/template_lvl1_set_persent/<int:item_id>", methods=["PUT"])
+def set_persent_template_lvl1(item_id):
+    item = TemplateLvl1.query.get_or_404(item_id)
+    data = request.get_json()
+    item.always_eat = data.get("always_eat", item.always_eat)
+    db.session.commit()
+    return jsonify({"id": item.id})
+
 # DELETE template_lvl1 item by ID
 @bp_template_lvl1.route("/<int:template_lvl1_id>", methods=["DELETE"])
 def delete_template_lvl1(template_lvl1_id):

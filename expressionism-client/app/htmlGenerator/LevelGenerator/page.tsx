@@ -4,6 +4,8 @@ import BlockList from '@/app/components/HTMLGenerator/BlockList/BlockList';
 import BlocksWithIntersectionOptions from '@/app/components/HTMLGenerator/BlocksWithIntersectionOptions/BlocksWithIntersectionOptions';
 import groupedContainerServices from '@/app/services/firstLevelServices/groupedContainerServices';
 import groupedContainerWireframeServices from '@/app/services/firstLevelServices/groupedContainerWireframeServices';
+import { Alert } from '@mui/material';
+import { CheckIcon } from 'lucide-react';
 
 
 type Block = {
@@ -46,7 +48,7 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
       try {
         const groupedContainer = await groupedContainerServices(1, level);
         console.log("данные groupedContainerServices", level, groupedContainer);
-        
+
         const wireframe = await groupedContainerWireframeServices(1, level);
         setGroup(groupedContainer);
         setWireframe(wireframe)
@@ -61,12 +63,14 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
   }, [level]);
 
   return (
-    <div style={{ maxHeight: '100vh', overflowY: 'auto', padding: '1rem' }}>
-      <h1>Шаг {level}. Генерация {level} уровня</h1>
+    <div style={{overflowY: 'hidden', padding: '1rem' }}>
+      <Alert variant="outlined" severity="info" sx={{mb:2}}>
+        Шаг {level}. Генерация {level} уровня
+      </Alert>
       {loading ? (
         <p>Загрузка...</p>
       ) : level === 1 ? (
-        <BlockList blocks={group as GroupedBlocks}  level={level}/>
+        <BlockList blocks={group as GroupedBlocks} level={level} />
       ) : level === 2 || level === 3 ? (
         <BlocksWithIntersectionOptions wireframe={wireframe} groups={group} level={level} />
       ) : (

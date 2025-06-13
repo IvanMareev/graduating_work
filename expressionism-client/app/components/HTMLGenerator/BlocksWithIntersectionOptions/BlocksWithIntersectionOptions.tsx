@@ -13,11 +13,12 @@ import {
   Tabs,
   TextField,
 } from '@mui/material';
-import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
+
 import createNewContainer from '@/app/services/firstLevelServices/createNewContainer';
 import { CreateContainerParams } from '@/app/types/lvl1';
-import BlockGroupList from '@/app/components/HTMLGenerator/BlockGroupList/BlockGroupList.tsx';
+import BlockGroupList from '@/app/components/HTMLGenerator/BlockGroupList/BlockGroupList';
 import BlockList from '../BlockList/BlockList';
 
 type Block = {
@@ -36,7 +37,7 @@ type Group = Block[];
 type BlockGroupsProps = {
   wireframe: unknown;
   level: number;
-  groups: unknown
+  groups: unknown;
 };
 
 const isValidGroups = (data: any): data is Group[] =>
@@ -66,17 +67,26 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
 
   return (
     <Box>
-      <Tabs value={tabIndex} onChange={(_, newIndex) => setTabIndex(newIndex)} sx={{ mb: 2 }}>
+      <Tabs
+        value={tabIndex}
+        onChange={(_, newIndex) => setTabIndex(newIndex)}
+        sx={{ mb: 2 }}
+        variant="scrollable"
+        scrollButtons="auto"
+      >
         <Tab label="Готовые комбинации" />
         <Tab label="Массив элементов второго уровня" />
       </Tabs>
 
       {tabIndex === 0 && (
         <>
-          <BlockGroupList wireframe={wireframe} level={level} />
-          <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
+          <Box sx={{ overflow: 'visible' }}>
+            <BlockGroupList wireframe={wireframe} level={level} />
+          </Box>
+
+          <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
             <DialogTitle>Добавить вариант</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ overflow: 'visible' }}>
               <TextField
                 fullWidth
                 label="Название блока"
@@ -100,8 +110,14 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
       )}
 
       {tabIndex === 1 && (
-        <Box mt={4} p={2} border="1px dashed gray" textAlign="center">
-          <BlockList blocks={groups} level={level}></BlockList>
+        <Box
+          mt={4}
+          p={2}
+          border="1px dashed gray"
+          textAlign="center"
+          sx={{ overflow: 'visible' }}
+        >
+          <BlockList blocks={groups} level={level} />
         </Box>
       )}
     </Box>

@@ -87,6 +87,14 @@ def update_template_lvl3(item_id):
     db.session.commit()
     return jsonify({"id": item.id})
 
+@bp_element_third_level.route("/template_lvl3_set_persent/<int:item_id>", methods=["PUT"])
+def set_persent_template_lvl3(item_id):
+    item = TemplateLvl3.query.get_or_404(item_id)
+    data = request.get_json()
+    item.always_eat = data.get("always_eat", item.always_eat)
+    db.session.commit()
+    return jsonify({"id": item.id})
+
 @bp_element_third_level.route("/template_lvl3/<int:item_id>", methods=["DELETE"])
 def delete_template_lvl3(item_id):
     item = TemplateLvl3.query.get_or_404(item_id)
@@ -256,5 +264,6 @@ def create_template_lvl3():
         "lvl3": new_template_lvl3.lvl3.name,
         "always_eat": new_template_lvl3.always_eat
     }), 201
+    
 
 

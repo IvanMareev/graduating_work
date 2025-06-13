@@ -4,7 +4,7 @@ import { LayoutVariantType } from "@/app/types/LayoutVariantType";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default async function setAlwaysPresentMarkerServices(
-  data: LayoutVariantType,
+  data: object,
   level: number
 ): Promise<LayoutVariantType | string> {
 
@@ -13,9 +13,9 @@ export default async function setAlwaysPresentMarkerServices(
   }
 
   const endpoints: Record<number, string> = {
-    1: `/layout_first/layout_variant_1/${data.id}`,
-    2: `/layout_second/layout_variant_2/${data.id}`,
-    3: `/layout_third/layout_variant_3/${data.id}`,
+    1: `/layout_first/template_lvl1/template_lvl1_set_persent/${data.id}`,
+    2: `/layout_second/template_lvl2_set_persent/${data.id}`,
+    3: `/layout_third/template_lvl3_set_persent/${data.id}`,
   };
 
   const endpoint = endpoints[level];

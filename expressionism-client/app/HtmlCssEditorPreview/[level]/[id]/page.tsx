@@ -9,6 +9,7 @@ import getLayoutVariantServices from '@/app/services/firstLevelServices/getLayou
 import putLayoutVariantServices from '@/app/services/firstLevelServices/putLayoutVariantServices';
 import createLayoutVariantServices from "@/app/services/firstLevelServices/createLayoutVariantServices";
 import { useSearchParams } from 'next/navigation';
+import improveComponent from '@/app/services/improveComponent'
 
 
 const HtmlCssEditorPreview: React.FC = () => {
@@ -18,7 +19,6 @@ const HtmlCssEditorPreview: React.FC = () => {
     const params = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
-
 
     useEffect(() => {
         const levelParam = Number(params?.level);
@@ -65,15 +65,30 @@ const HtmlCssEditorPreview: React.FC = () => {
                 'lvl_id': BlockID,
                 'template_id': template_id,
             };
-            console.log('newVariant',newVariant);
-            
+            console.log('newVariant', newVariant);
+
             await createLayoutVariantServices(newVariant, level);
         } else {
             await putLayoutVariantServices(layoutVariant, level);
         }
 
-
         router.push('/htmlGenerator');
+    };
+
+    const improveMarkup = async () => {
+        const nameParam = searchParams.get('name');
+        if (!layoutVariant || !nameParam) return;
+
+        try {
+            const improved = await improveComponent(layoutVariant.html, layoutVariant.css_style, nameParam);
+            setLayoutVariant(prev => ({
+                ...prev,
+                html: improved.html,
+                css_style: improved.css,
+            }));
+        } catch (error) {
+            console.error('Ошибка при улучшении верстки:', error);
+        }
     };
 
     return (
@@ -87,6 +102,9 @@ const HtmlCssEditorPreview: React.FC = () => {
                 </Button>
                 <Button variant="contained" onClick={saveLayoutVariant}>
                     Сохранять изменения
+                </Button>
+                <Button variant="outlined" onClick={improveMarkup}>
+                    Улучшить компонент
                 </Button>
             </div>
 

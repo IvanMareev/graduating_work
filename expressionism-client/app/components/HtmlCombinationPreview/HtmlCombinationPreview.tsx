@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { Typography, Box, Button, Modal, IconButton } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Button,
+  Modal,
+  IconButton,
+  Paper,
+  Divider
+} from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { ChevronLeft, ChevronRight, ViewQuilt as ViewQuiltIcon } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, ViewQuilt as ViewQuiltIcon, Close as CloseIcon } from '@mui/icons-material';
 
 type Block = {
   id: number;
@@ -23,45 +31,25 @@ type HtmlCombinationPreviewProps = {
   blocks: GroupedBlocks;
 };
 
-const CustomPrevArrow = ({ onClick }: { onClick?: () => void }) => (
+const CustomArrow = ({ direction, onClick }: { direction: 'left' | 'right'; onClick?: () => void }) => (
   <IconButton
     onClick={onClick}
     sx={{
       position: 'absolute',
-      top: '50%',
-      left: 0,
-      zIndex: 1,
+      top: '0%',
+      [direction]: -20,
       transform: 'translateY(-50%)',
-      backgroundColor: 'white',
+      backgroundColor: '#e4e4e4',
+      border: '1px solid #ccc',
       boxShadow: 1,
+      zIndex: 2,
       '&:hover': {
-        backgroundColor: 'grey.100',
+        backgroundColor: '#d6d6d6',
       },
     }}
-    aria-label="Previous"
+    aria-label={direction === 'left' ? 'Previous' : 'Next'}
   >
-    <ChevronLeft />
-  </IconButton>
-);
-
-const CustomNextArrow = ({ onClick }: { onClick?: () => void }) => (
-  <IconButton
-    onClick={onClick}
-    sx={{
-      position: 'absolute',
-      top: '50%',
-      right: 0,
-      zIndex: 1,
-      transform: 'translateY(-50%)',
-      backgroundColor: 'white',
-      boxShadow: 1,
-      '&:hover': {
-        backgroundColor: 'grey.100',
-      },
-    }}
-    aria-label="Next"
-  >
-    <ChevronRight />
+    {direction === 'left' ? <ChevronLeft /> : <ChevronRight />}
   </IconButton>
 );
 
@@ -72,69 +60,96 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
     return <Typography>Нет комбинаций для отображения</Typography>;
   }
 
-  const allCombinations = Object.entries(blocks).map(([groupName, groupBlocks], groupIndex) => {
-    return {
-      groupName,
-      html: groupBlocks.map(block => block.html).join('\n'),
-      css: groupBlocks.map(block => block.css_style).join('\n'),
-      length: groupBlocks.length,
-      index: groupIndex,
-    };
-  });
+  const allCombinations = Object.entries(blocks).map(([groupName, groupBlocks], groupIndex) => ({
+    groupName,
+    html: groupBlocks.map(block => block.html).join('\n'),
+    css: groupBlocks.map(block => block.css_style).join('\n'),
+    length: groupBlocks.length,
+    index: groupIndex,
+  }));
 
   const settings = {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: 4,
     slidesToScroll: 1,
-    nextArrow: <CustomNextArrow />,
-    prevArrow: <CustomPrevArrow />,
+    nextArrow: <CustomArrow direction="right" />,
+    prevArrow: <CustomArrow direction="left" />,
+    responsive: [
+      {
+        breakpoint: 700,
+        settings: { slidesToShow: 1 },
+      },
+    ],
   };
 
   return (
-    <Box sx={{ position: 'relative', width: '100%' }}>
-      <Slider {...settings}>
-        {allCombinations.map((combo) => (
-          <Box key={combo.groupName} sx={{ px: 1 }}>
-            <Button
-              variant="outlined"
-              onClick={() => setOpenIndex(combo.index)}
-              sx={{
-                width: 160,
-                height: 160,
-                p: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                textTransform: 'none',
-                borderRadius: 2,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              <ViewQuiltIcon sx={{ fontSize: 28, color: 'primary.main', mb: 1 }} />
-              <Box
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 0,
+        borderRadius: 2,
+        border: '2px solid #b4b4b4',
+        boxShadow: 3,
+        backgroundColor: '#f0f0f0',
+        mb: 10,
+        width: "97%",
+        mx: 'auto',
+        overflow: 'hidden'
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: '#d6d6d6',
+          borderBottom: '1px solid #b4b4b4',
+          px: 2,
+          py: 1,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight="bold">
+          Варианты комбинаций компонентов
+        </Typography>
+      </Box>
+
+      <Box sx={{ p: 2, position: 'relative' }}>
+        <Slider {...settings}>
+          {allCombinations.map((combo) => (
+            <Box key={combo.groupName} sx={{ px: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setOpenIndex(combo.index)}
                 sx={{
                   width: '100%',
-                  height: '100%',
-                  border: '1px solid #ccc',
-                  borderRadius: 1,
+                  height: 70,
+                  p: 1.2,
+                  borderRadius: 1.5,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textTransform: 'none',
                   backgroundColor: '#fff',
-                  pointerEvents: 'none',
-                  transform: 'scale(0.8)',
-                  transformOrigin: 'top center',
-                  overflow: 'hidden',
+                  borderColor: '#ccc',
+                  boxShadow: 1,
+                  '&:hover': {
+                    backgroundColor: '#f9f9f9',
+                    boxShadow: 2,
+                  },
                 }}
-                dangerouslySetInnerHTML={{
-                  __html: `<style>${combo.css}</style>${combo.html}`,
-                }}
-              />
-            </Button>
-          </Box>
-        ))}
-      </Slider>
+              >
+                <ViewQuiltIcon sx={{ fontSize: 28, color: 'primary.main', mb: 0.5 }} />
+                <Typography variant="body2" color="textSecondary">
+                  Макет {combo.index + 1}
+                </Typography>
+              </Button>
+            </Box>
+          ))}
+        </Slider>
+      </Box>
 
       {allCombinations.map((combo) => (
         <Modal
@@ -148,27 +163,42 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              bgcolor: 'background.paper',
-              border: '2px solid #000',
+              bgcolor: '#fff',
+              border: '2px solid #888',
               boxShadow: 24,
-              p: 4,
-              maxHeight: '90vh',
-              overflowY: 'auto',
               width: '90%',
-              maxWidth: 1000,
+              maxWidth: 800,
+              maxHeight: '75vh',
+              overflowY: 'auto',
+              borderRadius: 1,
             }}
           >
-            <Typography variant="h6" gutterBottom>
-              Комбинация #{combo.index + 1} (длина {combo.length}) - {combo.groupName}
-            </Typography>
-
-            <style>{combo.css}</style>
-
-            <div dangerouslySetInnerHTML={{ __html: combo.html }} />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#d6d6d6',
+                px: 2,
+                py: 1,
+                borderBottom: '1px solid #aaa',
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight="bold">
+                Комбинация #{combo.index + 1} — {combo.groupName}
+              </Typography>
+              <IconButton size="small" onClick={() => setOpenIndex(null)}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
+            <Box sx={{ p: 2 }}>
+              <style>{combo.css}</style>
+              <div dangerouslySetInnerHTML={{ __html: combo.html }} />
+            </Box>
           </Box>
         </Modal>
       ))}
-    </Box>
+    </Paper>
   );
 };
 
