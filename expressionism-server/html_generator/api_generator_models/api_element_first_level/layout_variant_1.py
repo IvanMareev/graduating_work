@@ -30,6 +30,35 @@ def get_layout_variant1(layout_variant1_id):
         "html": layout_variant1_item.html
     })
 
+@bp_layout_variant_1.route("/set_active_bulk", methods=["POST"])
+def set_active_bulk():
+    data = request.get_json()
+    template_lvl1_id = data.get("template_lvl_id")
+    is_active = data.get("is_active")
+
+    if template_lvl1_id is None or is_active is None:
+        abort(400, description="template_lvl1_id and is_active are required")
+
+    # Проверка, существует ли такой TemplateLvl1
+    template_lvl1 = TemplateLvl1.query.get(template_lvl1_id)
+    if not template_lvl1:
+        abort(404, description="TemplateLvl1 not found")
+
+    # Обновление всех связанных LayoutVariant1
+    updated_count = (
+        LayoutVariant1.query
+        .filter_by(template_lvl1_id=template_lvl1_id)
+        .update({"is_active": is_active})
+    )
+
+    db.session.commit()
+
+    return jsonify({
+        "updated_count": updated_count,
+        "template_lvl_id": template_lvl1_id,
+        "new_is_active": is_active
+    }), 200
+
 # POST create new layout_variant_1 item
 @bp_layout_variant_1.route("", methods=["POST"])
 def create_layout_variant1():

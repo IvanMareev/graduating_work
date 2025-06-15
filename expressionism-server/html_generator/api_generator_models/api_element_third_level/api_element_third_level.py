@@ -95,6 +95,36 @@ def set_persent_template_lvl3(item_id):
     db.session.commit()
     return jsonify({"id": item.id})
 
+@bp_element_third_level.route("/set_active_bulk", methods=["POST"])
+def set_active_bulk_third_level():
+    data = request.get_json()
+    template_lvl3_id = data.get("template_lvl_id")  # было template_lvl1_id — исправил
+    is_active = data.get("is_active")
+
+    if template_lvl3_id is None or is_active is None:
+        abort(400, description="template_lvl3_id and is_active are required")
+
+    # Проверяем, существует ли TemplateLvl3 с таким id
+    template_lvl3 = TemplateLvl3.query.get(template_lvl3_id)
+    if not template_lvl3:
+        abort(404, description="TemplateLvl3 not found")
+
+    # Обновляем все LayoutVariant3, у которых template_lvl2_id == template_lvl3_id
+    updated_count = (
+        LayoutVariant3.query
+        .filter_by(template_lvl2_id=template_lvl3_id)  # поле называется template_lvl2_id в LayoutVariant3
+        .update({"is_active": is_active}, synchronize_session=False)
+    )
+
+    db.session.commit()
+
+    return jsonify({
+        "updated_count": updated_count,
+        "template_lvl_id": template_lvl3_id,
+        "new_is_active": is_active
+    }), 200
+
+
 @bp_element_third_level.route("/template_lvl3/<int:item_id>", methods=["DELETE"])
 def delete_template_lvl3(item_id):
     item = TemplateLvl3.query.get_or_404(item_id)

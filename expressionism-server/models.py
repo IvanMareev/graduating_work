@@ -217,6 +217,7 @@ class Lvl1(db.Model):
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String, nullable=True)
     level = mapped_column(Integer, nullable=True, default=1)
+    # is_active = mapped_column(Boolean, nullable=True, default=True)
 
     def __str__(self):
         return self.name or f"Lvl1 #{self.id}"

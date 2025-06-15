@@ -11,11 +11,11 @@ generate_first_level1_api_blueprint = Blueprint("generate_first_level1", __name_
 @generate_first_level1_api_blueprint.get("/get_first_level1/<int:id>")
 def get_first_level1(id):
     sql = text('''
-        SELECT layout_variant_1.id, lvl1.name,lvl1.level, layout_variant_1.css_style, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id as template_lvl1_id
+        SELECT layout_variant_1.id, lvl1.name,lvl1.level, layout_variant_1.css_style, layout_variant_1.html, layout_variant_1.is_active,template_lvl1.always_eat, template_lvl1.id as template_lvl1_id
         FROM lvl1
         JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
         JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
-        WHERE template_lvl1.template_id = :id AND layout_variant_1.is_active
+        WHERE template_lvl1.template_id = :id
     ''')
     result = db.session.execute(sql, {"id": id})
 
@@ -26,6 +26,7 @@ def get_first_level1(id):
             "id": row.id,
             "always_eat": row.always_eat,
             "name": row.name,
+            "is_active": row.is_active,
             "level": row.level,
             "css_style": row.css_style,
             "html": row.html
@@ -35,15 +36,15 @@ def get_first_level1(id):
 
     return (data)
 
-# TODO Сделать метод для выдачи неактивных элементов
+# TODO Сделать метод для выдачи неактивных элементовs
 @generate_first_level1_api_blueprint.get("/get_first_level1_grouped/<int:id>")
 def get_first_level1_grouped(id):
     sql = text('''
-        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id, lvl1.id as lvl_id
+        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.is_active, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id, lvl1.id as lvl_id
         FROM lvl1
         JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
         JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
-        WHERE template_lvl1.template_id = :id AND layout_variant_1.is_active
+        WHERE template_lvl1.template_id = :id
     ''')
     result = db.session.execute(sql, {"id": id})
 
@@ -56,6 +57,7 @@ def get_first_level1_grouped(id):
             "id": row.id,
             "always_eat": row.always_eat,
             "name": row.name,
+            "is_active": row.is_active,
             "level": row.level,
             "css_style": row.css_style,
             "html": row.html,
@@ -148,7 +150,7 @@ def get_wireframe_combinations(all_components):
     # 2. Определяем обязательные группы (если есть always_eat = 1)
     required_groups = set()
     for name, blocks in groups.items():
-        if any(block.get('always_eat') == 1 for block in blocks):
+        if any(block.get('always_eat') == 1 and  block.get('is_active') == True for block in blocks):
             required_groups.add(name)
 
     # 3. Составляем варианты выбора для каждой группы

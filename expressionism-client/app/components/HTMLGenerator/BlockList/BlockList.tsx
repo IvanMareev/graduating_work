@@ -30,6 +30,7 @@ import createNewContainer from "@/app/services/firstLevelServices/createNewConta
 import { CreateContainerParams } from "@/app/types/lvl1";
 import getTemplateLvlTableServices from "@/app/services/firstLevelServices/getTemplateLvlTableServices";
 import setAlwaysPresentMarkerServices from "@/app/services/firstLevelServices/setAlwaysPresentMarkerServices";
+import setActiveStatusForAllLauoutVariantServices from "@/app/services/firstLevelServices/setActiveStatusForAllLauoutVariantServices";
 
 type Block = {
   id: number;
@@ -123,6 +124,18 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
     setPreviewBlock(null);
   };
 
+  const handleActiveStatus = async (template_lvl1_id: number, is_active: boolean) => {
+    let res = await setActiveStatusForAllLauoutVariantServices({
+      'template_lvl_id': template_lvl1_id,
+      'is_active': is_active
+    },
+      level)
+
+    console.log('handleActiveStatus', res);
+
+    ReqAgainBlock()
+  }
+
 
   useEffect(() => {
     const entriesArray = Object.entries(blocks);
@@ -203,244 +216,244 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
           gap: 2,
         }}
       >
-        
 
 
-          {/* Активные группы */}
-          {activeGroups.map(([groupName, groupBlocks]) => (
-            <Card
-              key={groupName}
-              variant="outlined"
-              sx={{
-                boxShadow:
-                  "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
-                borderColor: "#ccc",
-                borderTopWidth: groupName === activeGroups[0][0] ? "1px" : 0,
-                borderRadius: 0,
-                "&:first-of-type": {
-                  borderTopLeftRadius: 8,
-                  borderTopRightRadius: 8,
-                  borderTopWidth: "1px",
-                },
-                "&:last-of-type": {
-                  borderBottomLeftRadius: 8,
-                  borderBottomRightRadius: 8,
-                  borderBottomWidth: "1px",
-                },
-              }}
-            >
-              <CardContent>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  flexWrap="wrap"
-                  gap={2}
-                >
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Typography variant="h6">{groupName}</Typography>
-                    <Box
-                      sx={{
-                        backgroundColor: "#e0e0e0",
-                        borderRadius: 2,
-                        px: 1.5,
-                        py: 0.5,
-                        fontSize: "0.875rem",
-                        fontWeight: 500,
-                      }}
-                    >
-                      Вариантов: {groupBlocks.length}
-                    </Box>
-                  </Box>
 
+        {/* Активные группы */}
+        {activeGroups.map(([groupName, groupBlocks]) => (
+          <Card
+            key={groupName}
+            variant="outlined"
+            sx={{
+              boxShadow:
+                "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
+              borderColor: "#ccc",
+              borderTopWidth: groupName === activeGroups[0][0] ? "1px" : 0,
+              borderRadius: 0,
+              "&:first-of-type": {
+                borderTopLeftRadius: 8,
+                borderTopRightRadius: 8,
+                borderTopWidth: "1px",
+              },
+              "&:last-of-type": {
+                borderBottomLeftRadius: 8,
+                borderBottomRightRadius: 8,
+                borderBottomWidth: "1px",
+              },
+            }}
+          >
+            <CardContent>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                flexWrap="wrap"
+                gap={2}
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Typography variant="h6">{groupName}</Typography>
                   <Box
-                    position="relative"
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
+                    sx={{
+                      backgroundColor: "#e0e0e0",
+                      borderRadius: 2,
+                      px: 1.5,
+                      py: 0.5,
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                    }}
                   >
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      sx={{
-                        backgroundColor: "rgba(176, 173, 224, 0.83)",
-                        px: 1.5,
-                        py: 0.5,
-                        color: "black",
-                        fontWeight: 500,
-                        borderRadius: "10px",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      <FormControlLabel
-                        control={
-                          <Android12Switch
-                            checked={!!groupBlocks[0]?.always_eat}
-                            onChange={() => handleToggleAlwaysEat(groupName)}
-                          />
-                        }
-                        label="Обязательно в макете"
-                      />
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      onClick={() => setSelectedGroup(groupName)}
-                      sx={{ textTransform: "none", mr: 14 }}
-                    >
-                      Посмотреть варианты
-                    </Button>
-
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleRemoveGroup(groupName)} // нужно определить эту функцию
-                      sx={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        fontSize: "0.7rem",
-                        padding: "2px 6px",
-                        ml: 2,
-                        minHeight: "22px",
-                        textTransform: "none",
-                        color: "white",
-                        backgroundColor: "red",
-                        "&:hover": {
-                          backgroundColor: "#c62828",
-                        },
-                      }}
-                    >
-                      Убрать блок
-                    </Button>
+                    Вариантов: {groupBlocks.length}
                   </Box>
                 </Box>
-              </CardContent>
-            </Card>
-          ))}
 
-          {/* Неактивные группы — отдельный список */}
-          {inactiveGroups.length > 0 && (
-            <>
-              <Typography variant="h6" mt={4} mb={2}>
-                Не активные группы
-              </Typography>
-              {inactiveGroups.map(([groupName, groupBlocks]) => (
-                <Card
-                  key={groupName}
-                  variant="outlined"
-                  sx={{
-                    boxShadow:
-                      "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
-                    borderColor: "#ccc",
-                    borderRadius: 0,
-                    "&:first-of-type": {
-                      borderTopLeftRadius: 8,
-                      borderTopRightRadius: 8,
-                      borderTopWidth: "1px",
-                    },
-                    "&:last-of-type": {
-                      borderBottomLeftRadius: 8,
-                      borderBottomRightRadius: 8,
-                      borderBottomWidth: "1px",
-                    },
-                  }}
+                <Box
+                  position="relative"
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
                 >
-                  <CardContent>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      flexWrap="wrap"
-                      gap={2}
-                    >
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Typography variant="h6">{groupName}</Typography>
-                        <Box
-                          sx={{
-                            backgroundColor: "#e0e0e0",
-                            borderRadius: 2,
-                            px: 1.5,
-                            py: 0.5,
-                            fontSize: "0.875rem",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Вариантов: {groupBlocks.length}
-                        </Box>
-                      </Box>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    sx={{
+                      backgroundColor: "rgba(176, 173, 224, 0.83)",
+                      px: 1.5,
+                      py: 0.5,
+                      color: "black",
+                      fontWeight: 500,
+                      borderRadius: "10px",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Android12Switch
+                          checked={!!groupBlocks[0]?.always_eat}
+                          onChange={() => handleToggleAlwaysEat(groupName)}
+                        />
+                      }
+                      label="Обязательно в макете"
+                    />
+                  </Box>
 
+                  <Button
+                    variant="contained"
+                    onClick={() => setSelectedGroup(groupName)}
+                    sx={{ textTransform: "none", mr: 14 }}
+                  >
+                    Посмотреть варианты
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => handleActiveStatus(groupBlocks[0]?.template_lvl1_id, false)}
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      fontSize: "0.7rem",
+                      padding: "2px 6px",
+                      ml: 2,
+                      minHeight: "22px",
+                      textTransform: "none",
+                      color: "white",
+                      backgroundColor: "red",
+                      "&:hover": {
+                        backgroundColor: "#c62828",
+                      },
+                    }}
+                  >
+                    Убрать блок
+                  </Button>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* Неактивные группы — отдельный список */}
+        {inactiveGroups.length > 0 && (
+          <>
+            <Typography variant="h6" mt={4} mb={2}>
+              Не активные группы
+            </Typography>
+            {inactiveGroups.map(([groupName, groupBlocks]) => (
+              <Card
+                key={groupName}
+                variant="outlined"
+                sx={{
+                  boxShadow:
+                    "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
+                  borderColor: "#ccc",
+                  borderRadius: 0,
+                  "&:first-of-type": {
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                    borderTopWidth: "1px",
+                  },
+                  "&:last-of-type": {
+                    borderBottomLeftRadius: 8,
+                    borderBottomRightRadius: 8,
+                    borderBottomWidth: "1px",
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    gap={2}
+                  >
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Typography variant="h6">{groupName}</Typography>
                       <Box
-                        position="relative"
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
+                        sx={{
+                          backgroundColor: "#e0e0e0",
+                          borderRadius: 2,
+                          px: 1.5,
+                          py: 0.5,
+                          fontSize: "0.875rem",
+                          fontWeight: 500,
+                        }}
                       >
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          gap={1}
-                          sx={{
-                            backgroundColor: "rgba(176, 173, 224, 0.83)",
-                            px: 1.5,
-                            py: 0.5,
-                            color: "black",
-                            fontWeight: 500,
-                            borderRadius: "10px",
-                            fontSize: "0.875rem",
-                          }}
-                        >
-                          <FormControlLabel
-                            control={
-                              <Android12Switch
-                                checked={!!groupBlocks[0]?.always_eat}
-                                onChange={() => handleToggleAlwaysEat(groupName)}
-                              />
-                            }
-                            label="Обязательно в макете"
-                          />
-                        </Box>
-
-                        <Button
-                          variant="contained"
-                          onClick={() => setSelectedGroup(groupName)}
-                          sx={{ textTransform: "none", mr: 14 }}
-                        >
-                          Посмотреть варианты
-                        </Button>
-
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleRestoreGroup(groupName)} // нужно определить эту функцию
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            fontSize: "0.7rem",
-                            padding: "2px 6px",
-                            ml: 2,
-                            minHeight: "22px",
-                            textTransform: "none",
-                            color: "white",
-                            backgroundColor: "green",
-                            "&:hover": {
-                              backgroundColor: "#2e7d32",
-                            },
-                          }}
-                        >
-                          Вернуть блок
-                        </Button>
+                        Вариантов: {groupBlocks.length}
                       </Box>
                     </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          )}
-        </Box>
-      
+
+                    <Box
+                      position="relative"
+                      display="flex"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        sx={{
+                          backgroundColor: "rgba(176, 173, 224, 0.83)",
+                          px: 1.5,
+                          py: 0.5,
+                          color: "black",
+                          fontWeight: 500,
+                          borderRadius: "10px",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        <FormControlLabel
+                          control={
+                            <Android12Switch
+                              checked={!!groupBlocks[0]?.always_eat}
+                              onChange={() => handleToggleAlwaysEat(groupName)}
+                            />
+                          }
+                          label="Обязательно в макете"
+                        />
+                      </Box>
+
+                      <Button
+                        variant="contained"
+                        onClick={() => setSelectedGroup(groupName)}
+                        sx={{ textTransform: "none", mr: 14 }}
+                      >
+                        Посмотреть варианты
+                      </Button>
+
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleActiveStatus(groupBlocks[0]?.template_lvl1_id, true)}
+                        sx={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          fontSize: "0.7rem",
+                          padding: "2px 6px",
+                          ml: 2,
+                          minHeight: "22px",
+                          textTransform: "none",
+                          color: "white",
+                          backgroundColor: "green",
+                          "&:hover": {
+                            backgroundColor: "#2e7d32",
+                          },
+                        }}
+                      >
+                        Вернуть блок
+                      </Button>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        )}
+      </Box>
+
 
       {/* Модальное окно: список вариантов верстки в группе */}
       <Dialog

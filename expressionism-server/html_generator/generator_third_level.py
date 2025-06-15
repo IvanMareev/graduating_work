@@ -19,7 +19,8 @@ def fetch_third_level_blocks(template_id):
             layout_variant_3.html                      AS html,
             template_lvl3.template_lvl2_id             AS template_lvl2_id,
             template_lvl1.id                           AS template_lvl1_id,
-            placeholder_match_atoms.code               AS intersection_code
+            placeholder_match_atoms.code               AS intersection_code,
+            layout_variant_3.is_active
         FROM layout_variant_3
         JOIN template_lvl3
             ON layout_variant_3.template_lvl2_id = template_lvl3.id
@@ -36,8 +37,7 @@ def fetch_third_level_blocks(template_id):
         LEFT JOIN placeholder_match_atoms
             ON placeholder_match_atoms.id = placeholder_match_lvl3.placeholder_match_atoms_id
         WHERE
-            layout_variant_3.is_active = TRUE
-            AND template.id = :id
+            template.id = :id
     ''')
 
     result = db.session.execute(sql, {"id": template_id})
@@ -48,6 +48,7 @@ def fetch_third_level_blocks(template_id):
             "template_lvl2_id": row.template_lvl2_id,
             "intersection_code": row.intersection_code,
             "name": row.name,
+            "is_active": row.is_active,
             "css_style": row.css_style,
             "html": row.html
         }

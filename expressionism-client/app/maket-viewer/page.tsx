@@ -6,6 +6,7 @@ import html2pdf from 'html2pdf.js';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import readyMadeCombinationsServices from '../services/firstLevelServices/readyMadeCombinationsServices';
+import prefixCSS from '../utils/PrefixCSS';
 
 type Block = {
     groupName: string;
@@ -22,16 +23,24 @@ export default function MaketViewer() {
     const router = useRouter();
 
     useEffect(() => {
+
         const fetchData = async () => {
             const blocks = await readyMadeCombinationsServices(1, 3);
-            const allCombinations = Object.entries(blocks).map(([groupName, groupBlocks], groupIndex) => ({
-                groupName,
-                html: groupBlocks.map(block => block.html).join('\n'),
-                css: groupBlocks.map(block => block.css_style).join('\n'),
-                index: groupIndex,
-            }));
+
+            const allCombinations = Object.entries(blocks).map(([groupName, groupBlocks], groupIndex) => {
+                const prefix = `group-${groupIndex}`;
+
+                return {
+                    groupName,
+                    html: `<div class="${prefix}">\n${groupBlocks.map(block => block.html).join('\n')}\n</div>`,
+                    css: prefixCSS(groupBlocks.map(block => block.css_style).join('\n'), prefix),
+                    index: groupIndex,
+                };
+            });
+
             setBlocks(allCombinations);
         };
+
         fetchData();
     }, []);
 

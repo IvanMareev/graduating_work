@@ -7,6 +7,8 @@ from .generator_fisrt_level import get_wireframe_combinations, get_first_level1
 import copy
 import re
 from collections import defaultdict
+from flask import Response
+from itertools import chain, combinations
 
 
 generate_second_level_api_blueprint = Blueprint("generate_second_level1", __name__)
@@ -61,6 +63,7 @@ def get_second_level_grouped(id):
             layout_variant_2.css_style, 
             layout_variant_2.html, 
             layout_variant_2.id                         AS layout_variant_2_id,
+            layout_variant_2.is_active,
             template_lvl2.template_lvl1_id, 
             placeholder_match.code, 
             lvl2.id as lvl_id
@@ -71,7 +74,7 @@ def get_second_level_grouped(id):
         JOIN layout_variant_2 ON layout_variant_2.template_lvl2_id = template_lvl2.id
         LEFT JOIN placeholder_match_lvl2 ON placeholder_match_lvl2.lvl2_id = lvl2.id
         LEFT JOIN placeholder_match ON placeholder_match.id = placeholder_match_lvl2.placeholder_match_id
-        WHERE template.id = :id AND layout_variant_2.is_active = TRUE
+        WHERE template.id = :id
     ''')
 
     result = db.session.execute(sql, {"id": id})
@@ -85,6 +88,7 @@ def get_second_level_grouped(id):
             "template_lvl1_id": row.template_lvl1_id,
             "name": row.name,
             "css_style": row.css_style,
+            "is_active": row.is_active,
             "html": row.html,
             'lvl_id': row.lvl_id
         })
@@ -210,8 +214,6 @@ def scope_css(css, prefix):
     return "\n".join(scoped)
 
 
-from flask import Response
-from itertools import chain, combinations
 
 @generate_second_level_api_blueprint.get("/getting_all_wireframe_options_with_insertion/<int:id>")
 def getting_all_wireframe_options_with_insertion(id):

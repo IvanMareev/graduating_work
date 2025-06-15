@@ -144,6 +144,35 @@ def set_persent_template_lvl2(item_id):
     return jsonify({"id": item.id})
 
 
+@bp_element_second_level.route("/set_active_bulk", methods=["POST"])
+def set_active_bulk_second_level():
+    data = request.get_json()
+    template_lvl2_id = data.get("template_lvl_id")
+    is_active = data.get("is_active")
+
+    if template_lvl2_id is None or is_active is None:
+        abort(400, description="template_lvl2_id and is_active are required")
+
+    # Проверка, существует ли TemplateLvl2
+    template_lvl2 = TemplateLvl2.query.get(template_lvl2_id)
+    if not template_lvl2:
+        abort(404, description="TemplateLvl2 not found")
+
+    # Обновление всех связанных LayoutVariant2 по template_lvl2_id
+    updated_count = (
+        LayoutVariant2.query
+        .filter_by(template_lvl2_id=template_lvl2_id)  # Было template_lvl1_id, нужно template_lvl2_id
+        .update({"is_active": is_active}, synchronize_session=False)
+    )
+
+    db.session.commit()
+
+    return jsonify({
+        "updated_count": updated_count,
+        "template_lvl_id": template_lvl2_id,
+        "new_is_active": is_active
+    }), 200
+
 # LayoutVariant2 CRUD
 @bp_element_second_level.route("/layout_variant_2", methods=["GET"])
 def get_all_layout_variant2():

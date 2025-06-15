@@ -16,6 +16,7 @@ import {
   ViewQuilt as ViewQuiltIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import prefixCSS from '@/app/utils/PrefixCSS';
 
 type Block = {
   id: number;
@@ -34,6 +35,9 @@ type GroupedBlocks = {
 type HtmlCombinationPreviewProps = {
   blocks: GroupedBlocks;
 };
+
+
+
 
 const CustomArrow = ({ direction, onClick }: { direction: 'left' | 'right'; onClick?: () => void }) => (
   <IconButton
@@ -71,13 +75,24 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
     setSortedBlocks(sorted);
   }, [blocks]);
 
-  const allCombinations = Object.entries(sortedBlocks).map(([groupName, groupBlocks], groupIndex) => ({
-    groupName,
-    html: groupBlocks.map(block => block.html).join('\n'),
-    css: groupBlocks.map(block => block.css_style).join('\n'),
-    level: groupBlocks[0]?.level ?? 0,
-    index: groupIndex,
-  }));
+  const allCombinations = Object.entries(sortedBlocks).map(([groupName, groupBlocks], groupIndex) => {
+    const prefix = `group-${groupIndex}`;
+
+    // Оборачиваем html каждого блока в контейнер с классом префикса
+    const html = `<div class="${prefix}">\n${groupBlocks.map(block => block.html).join('\n')}\n</div>`;
+
+    // Добавляем префикс в css
+    const css = prefixCSS(groupBlocks.map(block => block.css_style).join('\n'), prefix);
+
+    return {
+      groupName,
+      html,
+      css,
+      level: groupBlocks[0]?.level ?? 0,
+      index: groupIndex,
+    };
+  });
+
 
   const settings = {
     dots: false,
