@@ -1,7 +1,7 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   experimental: {
-    turbo: true, // turbo compiler (быстрее webpack в dev)
+    turbo: {},
   },
   webpack: (config) => {
     config.resolve.alias.canvas = false;
@@ -10,4 +10,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

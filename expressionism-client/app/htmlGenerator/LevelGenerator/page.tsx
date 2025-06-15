@@ -5,8 +5,6 @@ import BlocksWithIntersectionOptions from '@/app/components/HTMLGenerator/Blocks
 import groupedContainerServices from '@/app/services/firstLevelServices/groupedContainerServices';
 import groupedContainerWireframeServices from '@/app/services/firstLevelServices/groupedContainerWireframeServices';
 import { Alert } from '@mui/material';
-import { CheckIcon } from 'lucide-react';
-
 
 type Block = {
   id: number;
@@ -35,23 +33,23 @@ type GroupedBlockVariants = Block[][];
 
 type LevelGeneratorProps = {
   level: number;
+  onReqAgain?: () => void;  // новый проп
 };
 
-const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
+const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level, onReqAgain }) => {
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState<GroupedBlocks | GroupedBlockVariants>({});
   const [wireframe, setWireframe] = useState<any>({});
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     const loadData = async () => {
       try {
         const groupedContainer = await groupedContainerServices(1, level);
-        console.log("данные groupedContainerServices", level, groupedContainer);
-
         const wireframe = await groupedContainerWireframeServices(1, level);
         setGroup(groupedContainer);
-        setWireframe(wireframe)
+        setWireframe(wireframe);
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
       } finally {
@@ -60,19 +58,24 @@ const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level }) => {
     };
 
     loadData();
-  }, [level]);
+  }, [level, refreshKey]);
+
+  const ReqAgainBlock = () => {
+    setRefreshKey(prev => prev + 1);
+    if (onReqAgain) onReqAgain();  // вызываем колбек из родителя, если есть
+  };
 
   return (
-    <div style={{overflowY: 'hidden', padding: '1rem' }}>
+    <div style={{ overflowY: 'hidden', padding: '1rem' }}>
       <Alert variant="outlined" severity="info" sx={{mb:2}}>
         Шаг {level}. Генерация {level} уровня
       </Alert>
       {loading ? (
         <p>Загрузка...</p>
       ) : level === 1 ? (
-        <BlockList blocks={group as GroupedBlocks} level={level} />
+        <BlockList blocks={group as GroupedBlocks} level={level} ReqAgainBlock={ReqAgainBlock} />
       ) : level === 2 || level === 3 ? (
-        <BlocksWithIntersectionOptions wireframe={wireframe} groups={group} level={level} />
+        <BlocksWithIntersectionOptions wireframe={wireframe} groups={group} level={level} ReqAgainBlock={ReqAgainBlock} />
       ) : (
         <p>Неизвестный уровень: {level}</p>
       )}

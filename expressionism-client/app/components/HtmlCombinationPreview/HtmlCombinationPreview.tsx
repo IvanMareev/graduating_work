@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -6,12 +6,16 @@ import {
   Modal,
   IconButton,
   Paper,
-  Divider
 } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { ChevronLeft, ChevronRight, ViewQuilt as ViewQuiltIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ViewQuilt as ViewQuiltIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 
 type Block = {
   id: number;
@@ -55,16 +59,23 @@ const CustomArrow = ({ direction, onClick }: { direction: 'left' | 'right'; onCl
 
 const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [sortedBlocks, setSortedBlocks] = useState<GroupedBlocks>({});
 
-  if (!blocks || Object.keys(blocks).length === 0) {
-    return <Typography>Нет комбинаций для отображения</Typography>;
-  }
+  useEffect(() => {
+    const sorted: GroupedBlocks = {};
+    for (const [groupName, groupBlocks] of Object.entries(blocks)) {
+      const activeBlocks = groupBlocks.filter((block) => block.is_active !== false);
+      sorted[groupName] = [...activeBlocks].sort((a, b) => a.level - b.level);
+    }
 
-  const allCombinations = Object.entries(blocks).map(([groupName, groupBlocks], groupIndex) => ({
+    setSortedBlocks(sorted);
+  }, [blocks]);
+
+  const allCombinations = Object.entries(sortedBlocks).map(([groupName, groupBlocks], groupIndex) => ({
     groupName,
     html: groupBlocks.map(block => block.html).join('\n'),
     css: groupBlocks.map(block => block.css_style).join('\n'),
-    length: groupBlocks.length,
+    level: groupBlocks[0]?.level ?? 0,
     index: groupIndex,
   }));
 
@@ -83,6 +94,10 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
       },
     ],
   };
+
+  if (!blocks || Object.keys(blocks).length === 0) {
+    return <Typography>Нет комбинаций для отображения</Typography>;
+  }
 
   return (
     <Paper
@@ -111,7 +126,7 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
         }}
       >
         <Typography variant="subtitle1" fontWeight="bold">
-          Варианты комбинаций компонентов
+          Варианты комбинаций компонентов {allCombinations.length} комбинации
         </Typography>
       </Box>
 

@@ -38,12 +38,13 @@ type BlockGroupsProps = {
   wireframe: unknown;
   level: number;
   groups: unknown;
+  ReqAgainBlock: any;
 };
 
 const isValidGroups = (data: any): data is Group[] =>
   Array.isArray(data) && data.every((group) => Array.isArray(group));
 
-const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, groups, level }) => {
+const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, groups, level, ReqAgainBlock }) => {
   const router = useRouter();
   const [tabIndex, setTabIndex] = useState(0);
   const [openModal, setOpenModal] = useState(false);
@@ -117,7 +118,7 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
           textAlign="center"
           sx={{ overflow: 'visible' }}
         >
-          <BlockList blocks={groups} level={level} />
+          <BlockList blocks={groups} level={level} ReqAgainBlock={() => ReqAgainBlock()} />
         </Box>
       )}
     </Box>

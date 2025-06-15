@@ -21,6 +21,7 @@ export default function BasicTabs() {
   const level = tabIndex + 1;
   const [loading, setLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any | null>(null);
+  const [refreshKey, setRefreshKey] = React.useState(0);  // ключ для обновления
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
@@ -41,9 +42,14 @@ export default function BasicTabs() {
       };
       loadPreview();
     }
-  }, [tabIndex, level]);
+  }, [tabIndex, level, refreshKey]);  // добавили refreshKey
 
-  return (
+  // колбек для передачи внутрь LevelGenerator
+  const handleReqAgainFromLevelGenerator = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", backgroundColor:"white" }}>
       {/* Верхняя панель */}
       <Box
@@ -132,7 +138,7 @@ export default function BasicTabs() {
       <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
         {tabIndex <= 2 ? (
           <Box sx={{ height: "100%", overflowY: "auto", p: 2 }}>
-            <LevelGenerator level={level} />
+            <LevelGenerator level={level}   onReqAgain={handleReqAgainFromLevelGenerator}/>
 
             {loading ? (
               <Box display="flex" justifyContent="center" mt={4}>
