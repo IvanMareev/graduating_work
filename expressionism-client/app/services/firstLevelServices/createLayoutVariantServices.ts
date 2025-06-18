@@ -38,19 +38,18 @@ export default async function createLayoutVariantServices(
   }
 
   console.log('template_lvl', {
-    template_id: data.template_id,                // передаем level вместо 1
-    lvl_id: data.lvl_id,     // передаем lvl1_id из данных
-    always_eat: 0                      // фиксированное значение
+    template_id: data.template_id,
+    lvl_id: data.lvl_id,
+    always_eat: 0
   });
 
   try {
-    // 1. Создание template_lvl с переданными данными
     const templateResponse = await axios.post<{ id: number }>(
       `${API_BASE_URL}${endpoint.template_lvl}`,
       {
-        template_id: data.template_id,                // передаем level вместо 1
-        lvl_id: data.lvl_id,     // передаем lvl1_id из данных
-        always_eat: 0                      // фиксированное значение
+        template_id: data.template_id,
+        lvl_id: data.lvl_id,
+        always_eat: 0
       },
       {
         headers: {
@@ -59,12 +58,10 @@ export default async function createLayoutVariantServices(
       }
     );
 
-    // Получаем id из ответа
     const template_lvl_id = templateResponse.data.id;
     console.log('template_lvl_id', template_lvl_id);
 
 
-    // 2. Создание layout_variant с использованием полученного template_lvl_id
     const layoutResponse = await axios.post<LayoutVariantType>(
       `${API_BASE_URL}${endpoint.layout_variant}`,
       {
@@ -78,7 +75,7 @@ export default async function createLayoutVariantServices(
       }
     );
 
-    return layoutResponse.data; // Возвращаем результат второго запроса
+    return layoutResponse.data;
   } catch (error: any) {
     return error.response?.data?.detail || "Ошибка при создании варианта макета";
   }

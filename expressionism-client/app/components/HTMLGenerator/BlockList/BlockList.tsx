@@ -13,10 +13,10 @@ type Block = {
   html: string;
   css: string;
   index: number;
-  level?: number; // Добавим уровень, если нужно
+  level?: number;
 };
 
-// --- Shadow DOM wrapper для изоляции стилей и DOM ---
+
 function ShadowRootWrapper({ html, css }: { html: string; css: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot | null>(null);
@@ -27,15 +27,12 @@ function ShadowRootWrapper({ html, css }: { html: string; css: string }) {
     }
 
     if (shadowRootRef.current) {
-      // Очистим содержимое перед рендером
       shadowRootRef.current.innerHTML = '';
 
-      // Добавляем стили
       const style = document.createElement('style');
       style.textContent = css;
       shadowRootRef.current.appendChild(style);
 
-      // Добавляем HTML
       const container = document.createElement('div');
       container.innerHTML = html;
       shadowRootRef.current.appendChild(container);
@@ -54,16 +51,13 @@ export default function MaketViewer() {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const router = useRouter();
 
-  // Загрузка блоков
   useEffect(() => {
     const fetchData = async () => {
       const blocksData = await readyMadeCombinationsServices(1, 3);
 
-      // Преобразуем в массив с префиксом CSS и группой
       const allCombinations = Object.entries(blocksData).map(([groupName, groupBlocks], groupIndex) => {
         const prefix = `group-${groupIndex}`;
 
-        // Можно передать level, если он есть в данных (пример)
         console.log('groupBlocks', groupBlocks);
         
         const level = groupBlocks?.[0]?.level ?? 0;
@@ -83,7 +77,6 @@ export default function MaketViewer() {
     fetchData();
   }, []);
   console.log('preview sorted', 12);
-  // Сортировка по уровню
   useEffect(() => {
     if (!blocks) return;
 
@@ -94,7 +87,6 @@ export default function MaketViewer() {
 
   }, [blocks]);
 
-  // Запрет определённых сочетаний клавиш и контекстного меню (оставил без изменений)
   useEffect(() => {
     const disableShortcuts = (e: KeyboardEvent) => {
       const blockedKeys = [
@@ -126,7 +118,6 @@ export default function MaketViewer() {
     };
   }, []);
 
-  // Эффект блюра при PrintScreen
   useEffect(() => {
     const blurScreen = () => {
       document.body.style.filter = 'blur(5px)';
@@ -145,7 +136,6 @@ export default function MaketViewer() {
     return () => document.removeEventListener('keyup', listener);
   }, []);
 
-  // Экспорт PDF одного блока
   const exportPDF = async (index: number) => {
     const element = refs.current[index];
     if (!element) return;
@@ -161,7 +151,6 @@ export default function MaketViewer() {
       .save();
   };
 
-  // Экспорт всех в ZIP
   const exportAllToZip = async () => {
     if (!sortedBlocks) return;
 
@@ -252,7 +241,6 @@ export default function MaketViewer() {
             borderRadius: '12px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
 
-            // Ограничение по ширине и авто-скролл по горизонтали если не помещается
             maxWidth: '100%',
             overflowX: 'auto',
           }}
@@ -267,12 +255,10 @@ export default function MaketViewer() {
               borderRadius: '8px',
               marginBottom: '12px',
               background: '#fff',
-              // Ограничение и автоскролл по горизонтали
               maxWidth: '100%',
               overflowX: 'auto',
             }}
           >
-            {/* Изоляция стилей и html через ShadowRoot */}
             <ShadowRootWrapper html={block.html} css={block.css} />
           </div>
 

@@ -8,7 +8,6 @@ const ChoiceNode: ExpressionismNode<NodeProps> = (props: NodeProps) => {
     const { getNodes, setNodes, getNode } = useReactFlow();
     const updateNodeInternals = useUpdateNodeInternals();
     const [branches, setBranches] = useState(["", ""]);
-    // const connections = useHandleConnections({})
 
     const setBranchesWrapper = (newBranches: string[]) => {
         setBranches(newBranches);

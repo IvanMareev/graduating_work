@@ -48,9 +48,6 @@ const tabStyles = sva({
             fontFamily: "inherit",
             fontSize: "sm",
             bg: "transparent",
-            // _focus: {
-            //     bg: "slate.3",
-            // },
         },
         alertIcon: {
             visibility: "hidden",

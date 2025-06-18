@@ -1,4 +1,3 @@
-// app/layout.tsx
 "use client";
 import { ReactNode } from 'react';
 import { CssBaseline } from '@mui/material';

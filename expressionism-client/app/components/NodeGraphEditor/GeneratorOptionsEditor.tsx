@@ -103,7 +103,6 @@ const GeneratorOptionsEditor = forwardRef((props: GeneratorOptionsEditorProps, r
         };
     }, [coefficients, mutate, props.generatorId, restricts, taskName, taskText, variables]);
 
-    // On data loaded
     useEffect(() => {
         if (data == null) return;
 
@@ -219,16 +218,6 @@ const GeneratorOptionsEditor = forwardRef((props: GeneratorOptionsEditorProps, r
                             placeholder="Например, Вычислить:"
                         />
                     </div>
-                    {/* <div className={styles.block}>
-                        <OptionLabel content="Переменные" />
-                        <MultiSelect
-                            value={variables}
-                            onChange={(e) => setVariables(e.value)}
-                            options={variablesOptions}
-                            placeholder="Выберите переменные"
-                        />
-                    </div> */}
-
                     <div className={styles.block}>
                         <OptionLabel content="Коэффициенты" />
                         <Flex gap={2}>

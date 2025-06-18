@@ -1,4 +1,4 @@
-"use client"; // Это важная строка для использования useRouter на клиенте
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,7 @@ import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 const PersonalPage = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [tokenInfo, setTokenInfo] = useState<any>(null);
-  const [loading, setLoading] = useState(true); // Состояние для загрузки
+  const [loading, setLoading] = useState(true); 
   const router = useRouter();
   useEffect(() => {
     if (userInfo || tokenInfo) return; 
@@ -23,7 +23,6 @@ const PersonalPage = () => {
         console.log(tokenInfoResponse);
         
 
-        // Если токен истек или неверен, перенаправляем на страницу входа
         if (!userInfoResponse || !tokenInfoResponse) {
           return 0;
         }
@@ -33,12 +32,12 @@ const PersonalPage = () => {
       } catch (error) {
         
       } finally {
-        setLoading(false); // Окончание загрузки
+        setLoading(false);
       }
     }
 
     fetchData();
-  }, [router]);  // Зависимость от router
+  }, [router]);
 
   if (loading) {
     return <div>Загрузка...</div>;
