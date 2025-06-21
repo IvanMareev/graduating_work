@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from 'react';
 import BlockList from '@/app/components/HTMLGenerator/BlockList/BlockList';
 import BlocksWithIntersectionOptions from '@/app/components/HTMLGenerator/BlocksWithIntersectionOptions/BlocksWithIntersectionOptions';
@@ -33,7 +34,7 @@ type GroupedBlockVariants = Block[][];
 
 type LevelGeneratorProps = {
   level: number;
-  onReqAgain?: () => void;  // новый проп
+  onReqAgain?: () => void;
 };
 
 const LevelGenerator: React.FC<LevelGeneratorProps> = ({ level, onReqAgain }) => {

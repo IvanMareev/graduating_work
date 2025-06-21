@@ -27,7 +27,7 @@ const RegisterPage = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     try { 
-      await axios.post(`${API_BASE_URL}/register`, data); // Подставьте ваш API-эндпоинт
+      await axios.post(`${API_BASE_URL}/register`, data);
       alert("Registration successful!");
     } catch (error: any) {
       setServerError(error.response?.data?.detail || "Registration failed");

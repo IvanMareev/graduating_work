@@ -42,16 +42,14 @@ export default function BasicTabs() {
       };
       loadPreview();
     }
-  }, [tabIndex, level, refreshKey]);  // добавили refreshKey
+  }, [tabIndex, level, refreshKey]);
 
-  // колбек для передачи внутрь LevelGenerator
   const handleReqAgainFromLevelGenerator = () => {
     setRefreshKey(prev => prev + 1);
   };
 
 return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", backgroundColor:"white" }}>
-      {/* Верхняя панель */}
       <Box
         sx={{
           px: 2,
@@ -134,7 +132,6 @@ return (
         </Stack>
       </Box>
 
-      {/* Контент вкладок */}
       <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
         {tabIndex <= 2 ? (
           <Box sx={{ height: "100%", overflowY: "auto", p: 2 }}>

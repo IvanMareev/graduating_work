@@ -138,6 +138,8 @@ def getting_all_wireframe_options(id):
     return Response(full_html, mimetype='text/html')
 
 
+from itertools import product
+
 def get_wireframe_combinations(all_components):
     # 1. Группируем блоки по name
     groups = {}
@@ -150,7 +152,7 @@ def get_wireframe_combinations(all_components):
     # 2. Определяем обязательные группы (если есть always_eat = 1)
     required_groups = set()
     for name, blocks in groups.items():
-        if any(block.get('always_eat') == 1 and  block.get('is_active') == True for block in blocks):
+        if any(block.get('always_eat') == 1 and block.get('is_active') == True for block in blocks):
             required_groups.add(name)
 
     # 3. Составляем варианты выбора для каждой группы
@@ -166,9 +168,12 @@ def get_wireframe_combinations(all_components):
     for combo in product(*group_choices):
         # Убираем None (если блок не выбран)
         filtered_combo = [block for block in combo if block is not None]
-        all_combinations.append(filtered_combo)
+        # Сортируем по возрастанию level
+        sorted_combo = sorted(filtered_combo, key=lambda b: b.get('level', 0))
+        all_combinations.append(sorted_combo)
 
     return all_combinations
+
 
 
 @generate_first_level1_api_blueprint.get("/getting_all_wireframe_components/<int:id>")
