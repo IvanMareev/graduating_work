@@ -1,651 +1,291 @@
-"use client";
+'use client';
 
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-  FormControl,
-  MenuItem,
-  Select,
-  InputLabel,
-  Switch,
-  FormControlLabel,
-  AccordionSummary,
-  AccordionDetails,
-  Accordion
-} from "@mui/material";
-import { styled } from '@mui/material/styles';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
-import createNewContainer from "@/app/services/firstLevelServices/createNewContainer";
-import { CreateContainerParams } from "@/app/types/lvl1";
-import getTemplateLvlTableServices from "@/app/services/firstLevelServices/getTemplateLvlTableServices";
-import setAlwaysPresentMarkerServices from "@/app/services/firstLevelServices/setAlwaysPresentMarkerServices";
-import setActiveStatusForAllLauoutVariantServices from "@/app/services/firstLevelServices/setActiveStatusForAllLauoutVariantServices";
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import readyMadeCombinationsServices from '../../services/firstLevelServices/readyMadeCombinationsServices';
+import prefixCSS from '../../utils/PrefixCSS';
 
 type Block = {
-  id: number;
-  name: string;
-  level: number;
+  groupName: string;
   html: string;
-  css_style: string;
-  lvl_id: number;
-  always_eat: boolean;
-  template_lvl1_id: number;
+  css: string;
+  index: number;
+  level?: number;
 };
 
-type GroupedBlocks = {
-  [name: string]: Block[];
-};
 
-type BlockListProps = {
-  blocks: GroupedBlocks;
-  level: number;
-  ReqAgainBlock: any;
-};
-
-const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) => {
-  const router = useRouter();
-  const [openAddModal, setOpenAddModal] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [newBlockContent, setNewBlockContent] = useState<CreateContainerParams | null>(null);
-  const [templateOptions, setTemplateOptions] = useState<any[]>([]);
-  const [openPreviewModal, setOpenPreviewModal] = useState(false);
-  const [previewBlock, setPreviewBlock] = useState<Block | null>(null);
-  const [sortedblocks, setSortedblocks] = useState<[string, Block[]][]>({});
-
-  const handleOpenAddModal = (groupName: string) => {
-    setSelectedGroup(groupName);
-    setOpenAddModal(true);
-  };
-
-  const handleCloseAddModal = () => {
-    setOpenAddModal(false);
-    setNewBlockContent(null);
-  };
-
-  const handleAddBlock = async () => {
-    if (!newBlockContent) return;
-    const updatedBlockContent = {
-      ...newBlockContent,
-      level: level,
-    };
-    const res = await createNewContainer(updatedBlockContent);
-    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${newBlockContent["template_lvl_id"] || 1}&name=${res.name}`);
-    handleCloseAddModal();
-  };
+function ShadowRootWrapper({ html, css }: { html: string; css: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const shadowRootRef = useRef<ShadowRoot | null>(null);
 
   useEffect(() => {
-    if (openAddModal && level !== 1) {
-      getTemplateLvlTableServices(level - 1).then((data) => {
-        if (Array.isArray(data)) {
-          setTemplateOptions(data);
-        }
-      });
+    if (ref.current && !shadowRootRef.current) {
+      shadowRootRef.current = ref.current.attachShadow({ mode: 'open' });
     }
-  }, [openAddModal, level]);
 
-  const handleToggleAlwaysEat = (groupName: string) => {
-    const groupBlocks = sortedblocks[groupName];
-    console.log('groupBlocks', groupBlocks);
+    if (shadowRootRef.current) {
+      shadowRootRef.current.innerHTML = '';
 
-    if (!groupBlocks || groupBlocks.length === 0) return;
+      const style = document.createElement('style');
+      style.textContent = css;
+      shadowRootRef.current.appendChild(style);
 
-    const newValue = !groupBlocks[0]?.always_eat;
-    let setAlwaysPresent = setAlwaysPresentMarkerServices({ 'always_eat': newValue, 'id': groupBlocks[0]?.template_lvl1_id }, level)
-    console.log('setAlwaysPresent', setAlwaysPresent);
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      shadowRootRef.current.appendChild(container);
+    }
+  }, [html, css]);
 
-    ReqAgainBlock()
+  return <div ref={ref} style={{ width: '100%', height: '100%' }} />;
+}
 
-    groupBlocks.forEach((sortedblocks) => {
-      block.always_eat = newValue;
-    });
+export default function MaketViewer() {
+  const [blocks, setBlocks] = useState<Block[] | null>(null);
+  const [sortedBlocks, setSortedBlocks] = useState<Block[] | null>(null);
 
-    setSelectedGroup(groupName + (newValue ? "1" : "0"));
-
-  };
-
-  const handleOpenPreviewModal = (block: Block) => {
-    setPreviewBlock(block);
-    setOpenPreviewModal(true);
-  };
-
-  const handleClosePreviewModal = () => {
-    setOpenPreviewModal(false);
-    setPreviewBlock(null);
-  };
-
-  const handleActiveStatus = async (template_lvl1_id: number, is_active: boolean) => {
-    let res = await setActiveStatusForAllLauoutVariantServices({
-      'template_lvl_id': template_lvl1_id,
-      'is_active': is_active
-    },
-      level)
-
-    console.log('handleActiveStatus', res);
-
-    ReqAgainBlock()
-  }
-
+  const searchParams = useSearchParams();
+  const selectedIndex = searchParams.get('index');
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    const entriesArray = Object.entries(blocks);
+    const fetchData = async () => {
+      const blocksData = await readyMadeCombinationsServices(1, 3);
 
-    const sorted = entriesArray.sort(([, a], [, b]) => {
-      const aLevel = a?.[0]?.level ?? 0;
-      const bLevel = b?.[0]?.level ?? 0;
-      return aLevel - bLevel;
-    });
+      const allCombinations = Object.entries(blocksData).map(([groupName, groupBlocks], groupIndex) => {
+        const prefix = `group-${groupIndex}`;
 
-    setSortedblocks(Object.fromEntries(sorted));
+        console.log('groupBlocks', groupBlocks);
+        
+        const level = groupBlocks?.[0]?.level ?? 0;
+
+        return {
+          groupName,
+          html: `<div class="${prefix}">\n${groupBlocks.map((block) => block.html).join('\n')}\n</div>`,
+          css: prefixCSS(groupBlocks.map((block) => block.css_style).join('\n'), prefix),
+          index: groupIndex,
+          level,
+        };
+      });
+
+      setBlocks(allCombinations);
+    };
+
+    fetchData();
+  }, []);
+  console.log('preview sorted', 12);
+  useEffect(() => {
+    if (!blocks) return;
+
+    const sorted = [...blocks].sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
+
+    setSortedBlocks(sorted);
+    console.log('preview sorted', sorted);
+
   }, [blocks]);
 
-  console.log('sortedblocks', sortedblocks);
+  useEffect(() => {
+    const disableShortcuts = (e: KeyboardEvent) => {
+      const blockedKeys = [
+        { ctrl: true, key: 'u' },
+        { ctrl: true, shift: true, key: 'i' },
+        { ctrl: true, shift: true, key: 'j' },
+        { key: 'F12' },
+        { key: 'PrintScreen' },
+      ];
 
-  const Android12Switch = styled(Switch)(({ theme }) => ({
-    padding: 8,
-    '& .MuiSwitch-track': {
-      borderRadius: 22 / 2,
-      '&::before, &::after': {
-        content: '""',
-        position: 'absolute',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        width: 14,
-        height: 14,
-      },
-      '&::before': {
-        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-          theme.palette.getContrastText(theme.palette.primary.main),
-        )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
-        left: 12,
-      },
-      '&::after': {
-        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-          theme.palette.getContrastText(theme.palette.primary.main),
-        )}" d="M19,13H5V11H19V13Z" /></svg>')`,
-        right: 12,
-      },
-    },
-    '& .MuiSwitch-thumb': {
-      boxShadow: 'none',
-      width: 16,
-      height: 16,
-      margin: 2,
-    },
-  }));
+      if (
+        blockedKeys.some(
+          (k) => (k.ctrl ? e.ctrlKey : true) && (k.shift ? e.shiftKey : true) && e.key === k.key
+        )
+      ) {
+        e.preventDefault();
+        alert('Действие запрещено');
+      }
+    };
 
+    const disableContextMenu = (e: MouseEvent) => e.preventDefault();
 
-  const activeGroups = Object.entries(sortedblocks).filter(
-    ([_, groupBlocks]) => groupBlocks.some(b => b.is_active)
-  );
+    window.addEventListener('keydown', disableShortcuts);
+    window.addEventListener('contextmenu', disableContextMenu);
 
-  const inactiveGroups = Object.entries(sortedblocks).filter(
-    ([_, groupBlocks]) => groupBlocks.every(b => !b.is_active)
-  );
+    return () => {
+      window.removeEventListener('keydown', disableShortcuts);
+      window.removeEventListener('contextmenu', disableContextMenu);
+    };
+  }, []);
+
+  useEffect(() => {
+    const blurScreen = () => {
+      document.body.style.filter = 'blur(5px)';
+      setTimeout(() => {
+        document.body.style.filter = 'none';
+      }, 2000);
+    };
+
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === 'PrintScreen') {
+        blurScreen();
+      }
+    };
+
+    document.addEventListener('keyup', listener);
+    return () => document.removeEventListener('keyup', listener);
+  }, []);
+
+  const exportPDF = async (index: number) => {
+    const element = refs.current[index];
+    if (!element) return;
+
+    await html2pdf()
+      .from(element)
+      .set({
+        margin: 0,
+        filename: `maket_${index + 1}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      })
+      .save();
+  };
+
+  const exportAllToZip = async () => {
+    if (!sortedBlocks) return;
+
+    const zip = new JSZip();
+
+    for (let i = 0; i < sortedBlocks.length; i++) {
+      const element = refs.current[i];
+      if (!element) continue;
+
+      try {
+        const pdfDataUri = await html2pdf().from(element).outputPdf('datauristring');
+        const base64Data = pdfDataUri.split(',')[1];
+        const fileName = `maket_${i + 1}.pdf`;
+        zip.file(fileName, base64Data, { base64: true });
+      } catch (error) {
+        console.error(`Ошибка при генерации PDF для блока ${i}:`, error);
+      }
+    }
+
+    try {
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, 'all_makets.zip');
+    } catch (error) {
+      console.error('Ошибка при создании архива ZIP:', error);
+    }
+  };
+
+  if (!sortedBlocks) return <div style={{ padding: '32px' }}>Загрузка макетов...</div>;
+
+  const filteredBlocks =
+    selectedIndex !== null ? [sortedBlocks[parseInt(selectedIndex, 10)]] : sortedBlocks;
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
-      <Button
-        variant="contained"
-        startIcon={<Plus size={18} />}
-        sx={{ textTransform: "none" }}
-        onClick={() => handleOpenAddModal("")}
-      >
-        Добавить контейнер
-      </Button>
-
-      <Box
-        sx={{
-          border: "1px solid #ddd",
-          borderRadius: 4,
-          boxShadow: 15,
-          p: 3,
-          bgcolor: "#fafafa",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
+    <div
+      style={{
+        padding: '32px',
+        fontFamily: 'sans-serif',
+        background: '#f9f9f9',
+        minHeight: '100vh',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '32px',
         }}
       >
+        <h1 style={{ fontSize: '28px', fontWeight: 600 }}>Просмотр макетов</h1>
+        <button
+          onClick={() => router.push('/htmlGenerator')}
+          style={{
+            backgroundColor: 'rgb(163, 152, 195)',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            border: '1px solid rgb(163, 152, 195)',
+            cursor: 'pointer',
+            color: 'black',
+          }}
+        >
+          Вернуться к генерации
+        </button>
+      </div>
 
+      <button
+        onClick={exportAllToZip}
+        style={{
+          backgroundColor: '#2563eb',
+          color: 'white',
+          padding: '10px 20px',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          marginBottom: '30px',
+        }}
+      >
+        Экспортировать все в ZIP
+      </button>
 
+      {filteredBlocks.map((block, idx) => (
+        <div
+          key={idx}
+          style={{
+            marginBottom: '48px',
+            background: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
 
-        {/* Активные группы */}
-        {activeGroups.map(([groupName, groupBlocks]) => (
-          <Card
-            key={groupName}
-            variant="outlined"
-            sx={{
-              boxShadow:
-                "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
-              borderColor: "#ccc",
-              borderTopWidth: groupName === activeGroups[0][0] ? "1px" : 0,
-              borderRadius: 0,
-              "&:first-of-type": {
-                borderTopLeftRadius: 8,
-                borderTopRightRadius: 8,
-                borderTopWidth: "1px",
-              },
-              "&:last-of-type": {
-                borderBottomLeftRadius: 8,
-                borderBottomRightRadius: 8,
-                borderBottomWidth: "1px",
-              },
+            maxWidth: '100%',
+            overflowX: 'auto',
+          }}
+        >
+          <h2 style={{ fontSize: '20px', marginBottom: '12px' }}>Макет: {block.groupName}</h2>
+
+          <div
+            ref={(el) => (refs.current[idx] = el)}
+            style={{
+              padding: '20px',
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              marginBottom: '12px',
+              background: '#fff',
+              maxWidth: '100%',
+              overflowX: 'auto',
             }}
           >
-            <CardContent>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                flexWrap="wrap"
-                gap={2}
-              >
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Typography variant="h6">{groupName}</Typography>
-                  <Box
-                    sx={{
-                      backgroundColor: "#e0e0e0",
-                      borderRadius: 2,
-                      px: 1.5,
-                      py: 0.5,
-                      fontSize: "0.875rem",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Вариантов: {groupBlocks.length}
-                  </Box>
-                </Box>
+            <ShadowRootWrapper html={block.html} css={block.css} />
+          </div>
 
-                <Box
-                  position="relative"
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                >
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    sx={{
-                      backgroundColor: "rgba(176, 173, 224, 0.83)",
-                      px: 1.5,
-                      py: 0.5,
-                      color: "black",
-                      fontWeight: 500,
-                      borderRadius: "10px",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    <FormControlLabel
-                      control={
-                        <Android12Switch
-                          checked={!!groupBlocks[0]?.always_eat}
-                          onChange={() => handleToggleAlwaysEat(groupName)}
-                        />
-                      }
-                      label="Обязательно в макете"
-                    />
-                  </Box>
-
-                  <Button
-                    variant="contained"
-                    onClick={() => setSelectedGroup(groupName)}
-                    sx={{ textTransform: "none", mr: 14 }}
-                  >
-                    Посмотреть варианты
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleActiveStatus(groupBlocks[0]?.template_lvl1_id, false)}
-                    sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      fontSize: "0.7rem",
-                      padding: "2px 6px",
-                      ml: 2,
-                      minHeight: "22px",
-                      textTransform: "none",
-                      color: "white",
-                      backgroundColor: "red",
-                      "&:hover": {
-                        backgroundColor: "#c62828",
-                      },
-                    }}
-                  >
-                    Убрать блок
-                  </Button>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Неактивные группы — отдельный список */}
-        {inactiveGroups.length > 0 && (
-          <>
-            <Typography variant="h6" mt={4} mb={2}>
-              Не активные группы
-            </Typography>
-            {inactiveGroups.map(([groupName, groupBlocks]) => (
-              <Card
-                key={groupName}
-                variant="outlined"
-                sx={{
-                  boxShadow:
-                    "inset 2px 2px 5px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.7)",
-                  borderColor: "#ccc",
-                  borderRadius: 0,
-                  "&:first-of-type": {
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                    borderTopWidth: "1px",
-                  },
-                  "&:last-of-type": {
-                    borderBottomLeftRadius: 8,
-                    borderBottomRightRadius: 8,
-                    borderBottomWidth: "1px",
-                  },
-                }}
-              >
-                <CardContent>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    flexWrap="wrap"
-                    gap={2}
-                  >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Typography variant="h6">{groupName}</Typography>
-                      <Box
-                        sx={{
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: 2,
-                          px: 1.5,
-                          py: 0.5,
-                          fontSize: "0.875rem",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Вариантов: {groupBlocks.length}
-                      </Box>
-                    </Box>
-
-                    <Box
-                      position="relative"
-                      display="flex"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        sx={{
-                          backgroundColor: "rgba(176, 173, 224, 0.83)",
-                          px: 1.5,
-                          py: 0.5,
-                          color: "black",
-                          fontWeight: 500,
-                          borderRadius: "10px",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        <FormControlLabel
-                          control={
-                            <Android12Switch
-                              checked={!!groupBlocks[0]?.always_eat}
-                              onChange={() => handleToggleAlwaysEat(groupName)}
-                            />
-                          }
-                          label="Обязательно в макете"
-                        />
-                      </Box>
-
-                      <Button
-                        variant="contained"
-                        onClick={() => setSelectedGroup(groupName)}
-                        sx={{ textTransform: "none", mr: 14 }}
-                      >
-                        Посмотреть варианты
-                      </Button>
-
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => handleActiveStatus(groupBlocks[0]?.template_lvl1_id, true)}
-                        sx={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          fontSize: "0.7rem",
-                          padding: "2px 6px",
-                          ml: 2,
-                          minHeight: "22px",
-                          textTransform: "none",
-                          color: "white",
-                          backgroundColor: "green",
-                          "&:hover": {
-                            backgroundColor: "#2e7d32",
-                          },
-                        }}
-                      >
-                        Вернуть блок
-                      </Button>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </>
-        )}
-      </Box>
-
-
-      {/* Модальное окно: список вариантов верстки в группе */}
-      <Dialog
-        open={!!selectedGroup && !openAddModal}
-        onClose={() => setSelectedGroup(null)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Варианты верстки для группы: {selectedGroup}</DialogTitle>
-        <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <Button
-              variant="contained"
-              startIcon={<Plus size={18} />}
-              sx={{ textTransform: "none" }}
-              onClick={() => {
-                router.push(
-                  `/HtmlCssEditorPreview/${level}/0?BlockID=${sortedblocks[selectedGroup || ""]?.[0]?.lvl_id || 0
-                  }&templateId=1`
-                );
-                setSelectedGroup(null);
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <button
+              onClick={() => exportPDF(idx)}
+              style={{
+                backgroundColor: '#10b981',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
               }}
             >
-              Добавить вариант верстки контейнера
-            </Button>
+              Скачать PDF
+            </button>
 
-            {/* Активные блоки */}
-            {sortedblocks[selectedGroup || ""]?.filter((b) => b.is_active).map((block) => (
-              <Card
-                key={block.id}
-                variant="outlined"
-                sx={{ cursor: "pointer" }}
-                onClick={() => handleOpenPreviewModal(block)}
-              >
-                <CardContent>
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    gap={2}
-                  >
-                    <Typography variant="subtitle1">ID: {block.id}</Typography>
-                    <Button
-                      variant="outlined"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(
-                          `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}`
-                        );
-                      }}
-                    >
-                      Редактировать
-                    </Button>
-                    <style>{block?.css_style}</style>
-                    <Box
-                      mt={1}
-                      p={2}
-                      width="300%"
-                      maxWidth={500}
-                      border="1px solid #ccc"
-                      borderRadius={2}
-                      dangerouslySetInnerHTML={{ __html: block?.html || "" }}
-                      sx={{
-                        overflowX: "auto",
-                        backgroundColor: "#fafafa",
-                        boxShadow: "inset 0 0 5px rgba(0,0,0,0.1)",
-                      }}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-
-            {/* Неактивные блоки в отдельном Accordion */}
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography>Не активные элементы</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {sortedblocks[selectedGroup || ""]?.filter((b) => !b.is_active).map((block) => (
-                  <Card
-                    key={block.id}
-                    variant="outlined"
-                    sx={{ cursor: "pointer", mt: 2 }}
-                    onClick={() => handleOpenPreviewModal(block)}
-                  >
-                    <CardContent>
-                      <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        gap={2}
-                      >
-                        <Typography variant="subtitle1">ID: {block.id}</Typography>
-                        <Button
-                          variant="outlined"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(
-                              `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}`
-                            );
-                          }}
-                        >
-                          Редактировать
-                        </Button>
-                        <style>{block?.css_style}</style>
-                        <Box
-                          mt={1}
-                          p={2}
-                          width="300%"
-                          maxWidth={500}
-                          border="1px solid #ccc"
-                          borderRadius={2}
-                          dangerouslySetInnerHTML={{ __html: block?.html || "" }}
-                          sx={{
-                            overflowX: "auto",
-                            backgroundColor: "#fafafa",
-                            boxShadow: "inset 0 0 5px rgba(0,0,0,0.1)",
-                          }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
-              </AccordionDetails>
-            </Accordion>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSelectedGroup(null)}>Закрыть</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={openAddModal} onClose={handleCloseAddModal} maxWidth="sm" fullWidth>
-        <DialogTitle>Добавить вариант</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Название блока"
-            onChange={(e) =>
-              setNewBlockContent((prev) => ({
-                ...prev,
-                containerName: e.target.value,
-              }))
-            }
-            margin="normal"
-          />
-          {level === 1 && (
-            <TextField
-              fullWidth
-              label="Значение сортировки"
-              onChange={(e) =>
-                setNewBlockContent((prev) => ({
-                  ...prev,
-                  physicalLevel: e.target.value,
-                }))
-              }
-              margin="normal"
-            />
-          )}
-          {level !== 1 && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Выберите с каким компонентом связать контейнер</InputLabel>
-              <Select
-                value={newBlockContent?.template_lvl_id || ""}
-                label="Template"
-                onChange={(e) =>
-                  setNewBlockContent((prev) => ({
-                    ...prev,
-                    template_lvl_id: e.target.value,
-                  }))
-                }
-              >
-                {templateOptions.map((tpl) => (
-                  <MenuItem key={tpl.id} value={tpl.id}>
-                    {tpl.template_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAddModal}>Отмена</Button>
-          <Button onClick={handleAddBlock} variant="contained">
-            Сохранить
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            <a
+              href={`?index=${block.index}`}
+              style={{ color: '#3b82f6', textDecoration: 'underline', alignSelf: 'center' }}
+            >
+              Открыть отдельно
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
   );
-
-};
-
-export default BlockList;
+}
