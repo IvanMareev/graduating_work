@@ -6,6 +6,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from passlib.hash import bcrypt
 from config import db
+from sqlalchemy import DateTime
 
 
 class Discipline(db.Model):
@@ -431,6 +432,16 @@ class LayoutVariant3(db.Model):
     def __repr__(self):
         return f"<LayoutVariant3 {self.id}>"
 
+
+class GeneratedLayouts(db.Model):
+    __tablename__ = "generated_layouts"
+
+    id = mapped_column(Integer, primary_key=True)
+    is_active = mapped_column(Boolean, nullable=True)
+    css_style = mapped_column(Text, nullable=False)
+    html = mapped_column(Text, nullable=False)
+    title = mapped_column(Text, nullable=False)
+    created_at = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
 @event.listens_for(Discipline.__table__, "after_create")
 def disciplines_default(*args, **kwargs):

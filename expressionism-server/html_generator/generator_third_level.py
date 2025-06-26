@@ -1,11 +1,13 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response
 from config import db
 from sqlalchemy import text
 from itertools import combinations, chain
-from flask import Response
 from .generator_second_level import get_intersection_first_level, get_second_level
 import copy
-from collections import defaultdict
+import uuid
+import itertools
+import re
+
 
 
 generate_third_level_api_blueprint = Blueprint("generate_third_level", __name__)
@@ -91,37 +93,48 @@ def getting_wireframe_combinations_with_suggested_insertion_atoms_options(id):
     return jsonify(get_wireframe_combinations_with_suggested_insertion_atoms_options(id))
 
 
-import copy
-import itertools
-from itertools import product
-
+def prefix_css_selectors(css: str, prefix: str) -> str:
+    # Префиксирует селекторы CSS (простые — без media queries)
+    result = []
+    for block in re.findall(r'(.*?)\{(.*?)\}', css, re.DOTALL):
+        selectors, body = block
+        prefixed_selectors = ', '.join(
+            f'{prefix} {s.strip()}' for s in selectors.split(',')
+        )
+        result.append(f"{prefixed_selectors} {{{body.strip()}}}")
+    return '\n\n'.join(result)
 
 def get_intersection_second_level(id):
     wireframe_combinations = get_wireframe_combinations_with_suggested_insertion_atoms_options(id)
     updated_combinations = []
 
-    for combo in wireframe_combinations:
-        # Пройдем по каждому элементу в комбо и определим все варианты его замен
+    for combo_index, combo in enumerate(wireframe_combinations):
         list_of_all_element_variants = []
 
-        for combo_element in combo:
+        for element_index, combo_element in enumerate(combo):
             base_html = combo_element["html"]
             base_css = combo_element["css_style"]
             insertion_options = combo_element.get("insertion_options", [])
 
-            # Словарь: плейсхолдер → вставки
+            # Уникальный идентификатор для этого элемента
+            element_uid = f"combo-{combo_index}-el-{element_index}"
+
+            # Плейсхолдер → вставки
             placeholders = {
                 code: [opt for opt in insertion_options if opt["intersection_code"] == code]
                 for code in set(opt["intersection_code"] for opt in insertion_options)
                 if code and isinstance(code, str) and code in base_html
             }
 
-            # Если вставок нет — просто оставляем как есть
             if not placeholders:
-                list_of_all_element_variants.append([combo_element])
+                isolated_html = f'<div class="{element_uid}">{base_html}</div>'
+                isolated_css = base_css
+                new_element = copy.deepcopy(combo_element)
+                new_element["html"] = isolated_html
+                new_element["css_style"] = isolated_css
+                list_of_all_element_variants.append([new_element])
                 continue
 
-            # Генерируем все комбинации вставок
             insertion_combinations = list(itertools.product(*placeholders.values()))
             element_variants = []
 
@@ -133,17 +146,29 @@ def get_intersection_second_level(id):
                     temp_html = temp_html.replace(insertion["intersection_code"], insertion["html"])
                     temp_css += "\n\n" + insertion["css_style"]
 
+                isolated_html = f'<div class="{element_uid}">{temp_html}</div>'
+                isolated_css = temp_css
+
                 new_element = copy.deepcopy(combo_element)
-                new_element["html"] = temp_html
-                new_element["css_style"] = temp_css
+                new_element["html"] = isolated_html
+                new_element["css_style"] = isolated_css
 
                 element_variants.append(new_element)
 
             list_of_all_element_variants.append(element_variants)
 
-        # Теперь собираем все возможные комбинации из вариантов блоков
+        # Собираем все варианты комбинаций
         for combo_variant in itertools.product(*list_of_all_element_variants):
-            updated_combinations.append(list(combo_variant))
+            # Вся комбинация в отдельный контейнер
+            combo_uid = f"combo-{combo_index}-{uuid.uuid4().hex[:8]}"
+            wrapped_combo = []
+
+            for elem in combo_variant:
+                elem = copy.deepcopy(elem)
+                elem["html"] = f'<div class="{combo_uid}">{elem["html"]}</div>'
+                wrapped_combo.append(elem)
+
+            updated_combinations.append(wrapped_combo)
 
     return updated_combinations
 
@@ -217,14 +242,6 @@ def getting_all_wireframe_options_with_insertion_atoms(id):
             combo_html = ""
 
             for block in combo:
-                # block_info = f"""
-                #     <div class="block-info">
-                #         <strong>ID:</strong> {block.get("id")} |
-                #         <strong>Name:</strong> {block.get("name")} |
-                #         <strong>Level:</strong> {block.get("level")} |
-                #         <strong>Always Eat:</strong> {block.get("always_eat")}
-                #     </div>
-                # """
                 block_html = block.get("html", "")
                 combo_html +=  block_html + "<hr/>"
 
@@ -240,6 +257,58 @@ def getting_all_wireframe_options_with_insertion_atoms(id):
     full_html += "</body></html>"
     return Response(full_html, mimetype='text/html')
 
+
+@generate_third_level_api_blueprint.get("/getting_all_wireframe_options_json/<int:id>")
+def getting_all_wireframe_options_json(id):
+    return jsonify(getting_all_wireframe_options(id))
+
+
+def getting_all_wireframe_options(id):
+    all_componets_all_combo = get_intersection_second_level(id)
+    result_json = []
+    combo_counter = 1
+
+    for all_componets in all_componets_all_combo:
+        always_eat_blocks = [b for b in all_componets if isinstance(b, dict) and b.get("always_eat") == 1]
+        optional_blocks = [b for b in all_componets if isinstance(b, dict) and b.get("always_eat") != 1]
+
+        optional_combinations = list(chain.from_iterable(
+            combinations(optional_blocks, r) for r in range(0, len(optional_blocks) + 1)
+        ))
+
+        final_combinations = []
+
+        for combo in optional_combinations:
+            full_combo = list(always_eat_blocks) + list(combo)
+
+            seen_ids = set()
+            seen_names = set()
+            unique_combo = []
+
+            for block in full_combo:
+                if isinstance(block, dict) and block.get('id') not in seen_ids and block.get('name') not in seen_names:
+                    seen_ids.add(block.get('id'))
+                    seen_names.add(block.get('name'))
+                    unique_combo.append(block)
+
+            final_combinations.append(unique_combo)
+
+        for combo in final_combinations:
+            combo.sort(key=lambda block: block.get("level", 0))
+
+            combo_styles = "\n".join(block.get("css_style", "") for block in combo)
+            combo_html = "".join(block.get("html", "") + "<hr/>" for block in combo)
+
+            result_json.append({
+                "combo_id": combo_counter,
+                "length": len(combo),
+                "css": combo_styles,
+                "html": combo_html,
+                "blocks": combo
+            })
+            combo_counter += 1
+
+    return result_json
 
 @generate_third_level_api_blueprint.get("/get_third_level_grouped/<int:id>")
 def get_third_level_grouped(id):

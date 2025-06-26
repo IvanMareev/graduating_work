@@ -464,7 +464,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
       >
         <DialogTitle>Варианты верстки для группы: {selectedGroup}</DialogTitle>
         <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} mt={1}>
+          <Box display="flex" flexDirection="column" gap={2} mt={1} width="100%">
             <Button
               variant="contained"
               startIcon={<Plus size={18} />}

@@ -271,7 +271,7 @@ def getting_all_wireframe_options_with_insertion(id):
             combo.sort(key=lambda block: block.get("level", 0))
 
             unique_class = f"combo-{combo_counter}"
-            combo_styles = "\n".join(scope_css(block.get("css_style", ""), unique_class) for block in combo)
+            combo_styles = block.get("css_style", "")
             combo_html = ""
 
             for block in combo:

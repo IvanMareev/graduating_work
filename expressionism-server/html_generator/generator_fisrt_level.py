@@ -9,17 +9,22 @@ generate_first_level1_api_blueprint = Blueprint("generate_first_level1", __name_
 
 
 @generate_first_level1_api_blueprint.get("/get_first_level1/<int:id>")
-def get_first_level1(id):
+def get_first_level1(id, is_active=False):
     sql = text('''
-        SELECT layout_variant_1.id, lvl1.name,lvl1.level, layout_variant_1.css_style, layout_variant_1.html, layout_variant_1.is_active,template_lvl1.always_eat, template_lvl1.id as template_lvl1_id
+        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, 
+               layout_variant_1.html, layout_variant_1.is_active, template_lvl1.always_eat, 
+               template_lvl1.id as template_lvl1_id
         FROM lvl1
         JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
         JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
         WHERE template_lvl1.template_id = :id
     ''')
-    result = db.session.execute(sql, {"id": id})
 
-    # Преобразуем результат в список словарей
+    if is_active == True:
+        sql = sql + text(' AND layout_variant_1.is_active = TRUE')
+
+    result = db.session.execute(sql, {"id": id, "is_active": is_active})
+
     data = [
         {
             'template_lvl1_id': row.template_lvl1_id,
@@ -34,7 +39,7 @@ def get_first_level1(id):
         for row in result
     ]
 
-    return (data)
+    return data
 
 # TODO Сделать метод для выдачи неактивных элементовs
 @generate_first_level1_api_blueprint.get("/get_first_level1_grouped/<int:id>")
@@ -45,6 +50,35 @@ def get_first_level1_grouped(id):
         JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
         JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
         WHERE template_lvl1.template_id = :id
+    ''')
+    result = db.session.execute(sql, {"id": id})
+
+    grouped = defaultdict(list)
+
+    for row in result:
+        grouped[row.name].append({
+
+            'template_lvl1_id': row.template_lvl1_id,
+            "id": row.id,
+            "always_eat": row.always_eat,
+            "name": row.name,
+            "is_active": row.is_active,
+            "level": row.level,
+            "css_style": row.css_style,
+            "html": row.html,
+            'lvl_id': row.lvl_id
+        })
+
+    return jsonify(grouped)
+
+@generate_first_level1_api_blueprint.get("/get_first_level1_grouped_only_active/<int:id>")
+def get_first_level1_grouped_only_active(id):
+    sql = text('''
+        SELECT layout_variant_1.id, lvl1.name, lvl1.level, layout_variant_1.css_style, layout_variant_1.is_active, layout_variant_1.html, template_lvl1.always_eat, template_lvl1.id AS template_lvl1_id, lvl1.id as lvl_id
+        FROM lvl1
+        JOIN template_lvl1 ON template_lvl1.lvl1_id = lvl1.id
+        JOIN layout_variant_1 ON layout_variant_1.template_lvl1_id = template_lvl1.id
+        WHERE template_lvl1.template_id = :id AND layout_variant_1.is_active
     ''')
     result = db.session.execute(sql, {"id": id})
 
@@ -141,9 +175,12 @@ def getting_all_wireframe_options(id):
 from itertools import product
 
 def get_wireframe_combinations(all_components):
+    # Фильтруем только активные компоненты
+    active_components = [block for block in all_components if block.get('is_active') == True]
+
     # 1. Группируем блоки по name
     groups = {}
-    for block in all_components:
+    for block in active_components:
         name = block['name']
         if name not in groups:
             groups[name] = []
@@ -152,16 +189,16 @@ def get_wireframe_combinations(all_components):
     # 2. Определяем обязательные группы (если есть always_eat = 1)
     required_groups = set()
     for name, blocks in groups.items():
-        if any(block.get('always_eat') == 1 and block.get('is_active') == True for block in blocks):
+        if any(block.get('always_eat') == 1 for block in blocks):
             required_groups.add(name)
 
     # 3. Составляем варианты выбора для каждой группы
     group_choices = []
     for name, blocks in groups.items():
         if name in required_groups:
-            group_choices.append(blocks)  # Обязательная группа: выбираем один вариант
+            group_choices.append(blocks)  # Обязательная группа: нужно выбрать один блок
         else:
-            group_choices.append(blocks + [None])  # Необязательная: можно не выбирать
+            group_choices.append(blocks + [None])  # Необязательная: можно ничего не выбрать
 
     # 4. Генерируем все комбинации через декартово произведение
     all_combinations = []

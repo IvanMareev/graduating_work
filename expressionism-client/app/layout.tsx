@@ -6,7 +6,7 @@ import "primereact/resources/themes/lara-light-blue/theme.css";
 import "react-tooltip/dist/react-tooltip.css";
 import { css, cx } from "styled-system/css";
 import "./globals.css";
-
+import '@fontsource/inter/latin.css';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export default function RootLayout({
     return (
         <html lang="ru">
             <PrimeReactProvider>
-                <body className={cx(inter.className, css({ backgroundColor: "slate.7" }))}>
+                <body className={cx(inter.className, css({ backgroundColor: "slate.7", fontFamily: 'Inter, sans-serif' }))}>
                     {children}
                 </body>
             </PrimeReactProvider>

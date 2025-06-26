@@ -12,12 +12,14 @@ import {
     Pencil,
     Plus,
     Trash2,
+    FolderOpen
 } from "lucide-react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { confirmPopup } from "primereact/confirmpopup";
 import { Dispatch, SetStateAction } from "react";
 import { TreeItem, TreeItemRenderContext } from "react-complex-tree";
 import { TreeNodeButtonProps } from "./TreeNodeButton";
+import randomString from "@/app/utils/randomString";
 
 export enum TreeItemAccesoryType {
     CourseStructure,
@@ -64,6 +66,8 @@ function mapDataToTree(
     setTaskId: Dispatch<SetStateAction<number | null>>,
 ): MappedData {
     const mappedValues: MappedData = {};
+
+    const titleForHTMLGenerator = randomString();
 
     data.forEach((section) => {
         const newTopicAction = "new_topic_" + section.id;
@@ -246,7 +250,7 @@ function mapDataToTree(
                                 icon: Edit,
                                 tooltip: "Перейти к редактору",
                                 onClick: (context) => {
-                                    router.push(`editor/${generator.id}`);
+                                    router.push(`/htmlGenerator/?title=${generator.id}`);
                                 },
                                 hoverColor: "green",
                             },
@@ -261,6 +265,14 @@ function mapDataToTree(
                                     },
                                 },
                                 hoverColor: "red",
+                            },
+                            {
+                                icon: FolderOpen,
+                                tooltip: "Посмотреть варианты",
+                                onClick: (context) => {
+                                    router.push(`/maket-viewer/?title=${generator.id}`);
+                                },
+                                hoverColor: "green",
                             },
                         ],
                     },

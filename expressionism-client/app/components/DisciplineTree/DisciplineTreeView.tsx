@@ -19,7 +19,6 @@ import {
 import { Tooltip } from "react-tooltip";
 import useSWR from "swr";
 import Block from "../Block";
-import CourseVariantList from "../CourseVariantList";
 import GenerationPopup from "../Results/GenerationPopup";
 import mapDataToTree, { TreeItemData, TreeItemType } from "./mapData";
 import disciplineTreeRenderers from "./renderers";
@@ -63,6 +62,7 @@ const DisciplineTreeView = observer(function DisciplineTreeView({
     });
 
     const router = useRouter();
+
 
     const environment = useRef<TreeEnvironmentRef>(null);
     const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([]);
@@ -181,12 +181,12 @@ const DisciplineTreeView = observer(function DisciplineTreeView({
                 const first =
                     target.targetType === "item" &&
                     environment.current?.items[target.targetItem].data.itemType ===
-                        TreeItemType.Task;
+                    TreeItemType.Task;
 
                 const second =
                     target.targetType === "between-items" &&
                     environment.current?.items[target.parentItem].data.itemType ===
-                        TreeItemType.Task;
+                    TreeItemType.Task;
 
                 return first || second;
             }}
@@ -213,19 +213,6 @@ const DisciplineTreeView = observer(function DisciplineTreeView({
                         <Tree treeId={"course-structure-tree"} rootItem={"root_left"} />
                     </Block>
                 </Box>
-                <Box className={styles.column}>
-                    <h3 className={styles.header}>Контрольно-измерительные материалы</h3>
-                    <Block className={styles.content}>
-                        <Tree
-                            treeId={"control-materials-tree"}
-                            rootItem={courseTreeState.selectedTopic}
-                        />
-                    </Block>
-                    <Block className={styles.courseVariants}>
-                        <CourseVariantList courseTreeState={courseTreeState} />
-                    </Block>
-                </Box>
-                <Tooltip id="tree-node-button" />
             </Box>
             <Tooltip
                 style={{ backgroundColor: "var(--colors-red-light-9)" }}

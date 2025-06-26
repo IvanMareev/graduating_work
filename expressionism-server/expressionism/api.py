@@ -18,6 +18,7 @@ from expressionism.printer import Printer
 import json
 import os
 from admin import init_admin
+from pathlib import Path
 
 
 expressionism_api_blueprint = Blueprint("expressionism", __name__)
@@ -459,9 +460,10 @@ def get_variant_document(variant_id):
     result = db.session.get(GenerationResult, variant.result_id)
 
     file_name = f"variant_{result.id}_{variant_id}"
-    file_path = f"{app.static_folder}\\{file_name}"
+    file_path = Path(app.static_folder) / file_name
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if os.path.isfile(file_path + ".pdf"):
+    if (file_path.with_suffix(".pdf")).is_file():
         return send_from_directory(app.static_folder, file_name + ".pdf")
 
     variant_index = next(
@@ -477,7 +479,6 @@ def get_variant_document(variant_id):
         return server_msg("Вариант не найден", 404)
 
     Printer.create_variant_pdf(json.loads(result.results), variant_index, file_path)
-
     # ic(os.path.isfile(file_path + ".pdf"))
     # time.sleep(1)
 

@@ -26,7 +26,8 @@ from models import (
     TemplateLvl3,
     LayoutVariant3,
     PlaceholderMatch,
-    PlaceholderMatchAtoms
+    PlaceholderMatchAtoms,
+    GeneratedLayouts
 
 )
 from sqlalchemy import inspect
@@ -83,6 +84,10 @@ def init_admin():
     admin.add_view(ModelView(LayoutVariant3, db.session, name="Вариации верстки атомов", category="Уровень 3 (Атомы)"))
 
     admin.add_view(PlaceholderMatchAtomsAdmin(PlaceholderMatchAtoms, db.session, name="Код лоцирования элементов в lvl2",category="Уровень 3 (Атомы)"))
+
+    admin.add_view(ModelView(GeneratedLayouts, db.session, name="Результаты генерации"))
+
+    
 
     # Категория для прочих моделей
     admin.add_view(ModelView(Discipline, db.session, category="Мат анализ"))

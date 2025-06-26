@@ -283,7 +283,7 @@ def get_placeholder_match(placeholder_match_id):
 
 
 
-@bp_element_second_level.route("/test/", methods=["GET"])
+@bp_element_second_level.route("/test", methods=["GET"])
 def test():
     discipline = db.session.execute(db.select(Discipline)).scalar_one()
 

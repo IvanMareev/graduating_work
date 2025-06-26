@@ -5,12 +5,14 @@ const disciplineTreeViewStyles = sva({
     base: {
         root: {
             display: "flex",
+             justifyContent: "center",
             gap: 4,
             borderRadius: 16,
             w: "full",
             h: "full",
             p: 4,
             bgColor: "slate.4",
+            width: "100%"
         },
         column: {
             boxSizing: "border-box",
@@ -52,6 +54,7 @@ const treeRenderersStyles = sva({
             alignItems: "center",
             py: 2,
             pr: 2,
+            fontSize: "xl",
             fontWeight: "medium",
             _hover: {
                 "& .tr-renderer__extra": {

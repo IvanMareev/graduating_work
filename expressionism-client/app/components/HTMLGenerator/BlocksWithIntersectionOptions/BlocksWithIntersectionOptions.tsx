@@ -75,11 +75,12 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
         variant="scrollable"
         scrollButtons="auto"
       >
-        <Tab label="Готовые комбинации" />
         <Tab label="Массив элементов второго уровня" />
+        <Tab label="Готовые комбинации" />
+        
       </Tabs>
 
-      {tabIndex === 0 && (
+      {tabIndex === 1 && (
         <>
           <Box sx={{ overflow: 'visible' }}>
             <BlockGroupList wireframe={wireframe} level={level} />
@@ -110,7 +111,7 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
         </>
       )}
 
-      {tabIndex === 1 && (
+      {tabIndex === 0 && (
         <Box
           mt={4}
           p={2}
