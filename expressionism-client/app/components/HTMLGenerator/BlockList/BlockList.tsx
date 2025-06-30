@@ -459,12 +459,23 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
       <Dialog
         open={!!selectedGroup && !openAddModal}
         onClose={() => setSelectedGroup(null)}
-        maxWidth="md"
+        maxWidth="xl"
         fullWidth
-      >
+        sx={{
+          width: '100%',
+          cursor: "pointer"
+        }}>
         <DialogTitle>Варианты верстки для группы: {selectedGroup}</DialogTitle>
         <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} mt={1} width="100%">
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={2}
+            mt={1}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
             <Button
               variant="contained"
               startIcon={<Plus size={18} />}
@@ -485,7 +496,6 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
               <Card
                 key={block.id}
                 variant="outlined"
-                sx={{ cursor: "pointer" }}
                 onClick={() => handleOpenPreviewModal(block)}
               >
                 <CardContent>

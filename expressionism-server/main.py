@@ -16,16 +16,14 @@ app.register_blueprint(generate_third_level_api_blueprint, url_prefix="/api/v1")
 
 app.register_blueprint(concat_blueprints, url_prefix="/api/v1")
 init_admin()
-
 # Настройка миграций
 migrate = Migrate(app, db)
 
-# CLI-команда для flask
-cli = FlaskGroup(app)
+
 
 @app.route("/")
 def index():
     return "Server is running!"
 
 if __name__ == "__main__":
-    cli()
+    app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=True)

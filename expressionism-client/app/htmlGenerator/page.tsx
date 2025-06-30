@@ -156,6 +156,22 @@ export default function BasicTabs() {
           <Button
             variant="contained"
             size="small"
+            startIcon={<Play size={12} />}
+            onClick={() => router.push(`/`)}
+            sx={{
+              fontSize: "10px",
+              px: 1.5,
+              minHeight: 28,
+              textTransform: "none",
+              backgroundColor: "#00bcd4",
+              ":hover": { backgroundColor: "#0097a7" },
+            }}
+          >
+            Вернуться на главную
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
             onClick={handleOpen}
             startIcon={<Play size={12} />}
             sx={{
@@ -174,7 +190,7 @@ export default function BasicTabs() {
             handleClose={() => setIsDialogOpen(false)}
             handleOption1={() => handleClose()}
             handleOption2={() => GenerationResult(1)}
-            routeToPage={()=>router.push(`maket-viewer/?title=${titleUrl}`)}
+            routeToPage={() => router.push(`maket-viewer/?title=${titleUrl}`)}
             isExistTitle={isExistTitle}
           />
 
@@ -183,6 +199,7 @@ export default function BasicTabs() {
             variant="contained"
             size="small"
             startIcon={<Settings size={18} />}
+            onClick={() => window.open('http://localhost:5000/admin', '_blank')}  // Открываем ссылку в новой вкладке
             sx={{
               fontSize: "10px",
               px: 2,

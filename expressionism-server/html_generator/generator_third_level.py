@@ -9,7 +9,6 @@ import itertools
 import re
 
 
-
 generate_third_level_api_blueprint = Blueprint("generate_third_level", __name__)
 
 def fetch_third_level_blocks(template_id):
@@ -87,7 +86,6 @@ def get_wireframe_combinations_with_suggested_insertion_atoms_options(template_i
     return wireframe_combinations
 
 
-
 @generate_third_level_api_blueprint.get("/get_wireframe_combinations_with_suggested_insertion_atoms_options/<int:id>")
 def getting_wireframe_combinations_with_suggested_insertion_atoms_options(id):
     return jsonify(get_wireframe_combinations_with_suggested_insertion_atoms_options(id))
@@ -103,6 +101,7 @@ def prefix_css_selectors(css: str, prefix: str) -> str:
         )
         result.append(f"{prefixed_selectors} {{{body.strip()}}}")
     return '\n\n'.join(result)
+
 
 def get_intersection_second_level(id):
     wireframe_combinations = get_wireframe_combinations_with_suggested_insertion_atoms_options(id)
@@ -180,8 +179,6 @@ def getting_intersection_second_level(id):
     return jsonify(get_intersection_second_level(id))
 
 
-from flask import Response
-from itertools import chain, combinations
 
 @generate_third_level_api_blueprint.get("/getting_all_wireframe_options_with_insertion_atoms/<int:id>")
 def getting_all_wireframe_options_with_insertion_atoms(id):

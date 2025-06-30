@@ -103,9 +103,6 @@ const HtmlCssEditorPreview: React.FC = () => {
                 <Button variant="contained" onClick={saveLayoutVariant}>
                     Сохранять изменения
                 </Button>
-                <Button variant="outlined" onClick={improveMarkup}>
-                    Улучшить компонент
-                </Button>
             </div>
 
             <FormControlLabel

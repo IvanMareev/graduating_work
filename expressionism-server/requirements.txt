@@ -48,6 +48,7 @@ typing_extensions==4.12.2
 urllib3==2.2.2
 Werkzeug==3.0.3
 WTForms==3.1.2
+watchdog==6.0.0
 WTForms-SQLAlchemy==0.4.2
 zope.event==5.0
 zope.interface==6.4.post2

@@ -37,17 +37,17 @@ const headerStyles = sva({
             },
         },
     },
-    defaultVariants: { size: "big" },
+    defaultVariants: { size: "big" }, // Установлен размер по умолчанию на "big"
 });
 
 type HeaderProps = RecipeVariantProps<typeof headerStyles> & {};
 
 const Header = (props: HeaderProps) => {
-    const styles = headerStyles(props);
+    const styles = headerStyles(props); // Применяем стили с учетом переданных props
     return (
         <header className={styles.root}>
             <Link href={"/"}>
-                <h1 className={styles.title}>Expressionism</h1>
+                <h1 className={styles.title}>Генератор HTML-макетов</h1>
             </Link>
         </header>
     );

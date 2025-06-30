@@ -90,17 +90,17 @@ def init_admin():
     
 
     # Категория для прочих моделей
-    admin.add_view(ModelView(Discipline, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(Section, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(Topic, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(TaskGenerator, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(Generator, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(TaskType, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(CourseVariant, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(Task, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(GenerationResult, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(GenerationVariant, db.session, category="Мат анализ"))
-    admin.add_view(ModelView(User, db.session, category="Мат анализ"))
+    admin.add_view(ModelView(Discipline, db.session, category="Структура курса"))
+    admin.add_view(ModelView(Section, db.session, category="Структура курса"))
+    admin.add_view(ModelView(Topic, db.session, category="Структура курса"))
+    admin.add_view(ModelView(TaskGenerator, db.session, category="Структура курса"))
+    admin.add_view(ModelView(Generator, db.session, category="Структура курса"))
+    admin.add_view(ModelView(TaskType, db.session, category="Структура курса"))
+    admin.add_view(ModelView(CourseVariant, db.session, category="Структура курса"))
+    admin.add_view(ModelView(Task, db.session, category="Структура курса"))
+    admin.add_view(ModelView(GenerationResult, db.session, category="Структура курса"))
+    admin.add_view(ModelView(GenerationVariant, db.session, category="Структура курса"))
+    admin.add_view(ModelView(User, db.session, category="Структура курса"))
 
     # Добавление представления для TemplateLvl1
 

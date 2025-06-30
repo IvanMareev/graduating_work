@@ -186,6 +186,7 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
           key={combo.groupName}
           open={openIndex === combo.index}
           onClose={() => setOpenIndex(null)}
+
         >
           <Box
             sx={{
@@ -196,11 +197,10 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
               bgcolor: '#fff',
               border: '2px solid #888',
               boxShadow: 24,
-              width: '90%',
-              maxWidth: 800,
-              maxHeight: '75vh',
+              maxHeight: '80vh',
               overflowY: 'auto',
               borderRadius: 1,
+              width: 1000, 
             }}
           >
             <Box
