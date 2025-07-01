@@ -34,5 +34,25 @@ services:
       - FLASK_ENV=development
     env_file: ./expressionism-server/.env
 
+  expressionism-client-dev:
+    build:
+      context: ./expressionism-client
+    volumes:
+      - ./expressionism-client:app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    command: yarn dev
+    
+
+  expressionism-client:
+    build:
+      context: ./expressionism-client
+    volumes:
+      - ./expressionism-client:app  
+    working_dir: /app
+    ports:
+      - "3000:3000"    
+
 volumes:
   pgdata:
