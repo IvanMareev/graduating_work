@@ -33,7 +33,8 @@ export default function MaketViewer() {
   const [combinations, setCombinations] = useState<Combo[] | null>(null);
   const searchParams = useSearchParams();
   const selectedIndex = searchParams.get('index');
-  const title = searchParams.get('title');
+  const searchParams1 = new URLSearchParams(window.location.search);
+  const title = searchParams1.get('title');
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const router = useRouter();
 
@@ -119,7 +120,6 @@ const exportAllToZip = async () => {
   }
 };
 
-// if (!combinations) return <div style={{ padding: '32px' }}>Загрузка макетов...</div>;
 
 const filtered = selectedIndex !== null ? [combinations[parseInt(selectedIndex, 10)]] : combinations;
 
@@ -129,7 +129,7 @@ return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 600 }}>Просмотр макетов</h1>
         <button
-          onClick={() => router.push(`/htmlGenerator?title=${title}`)}
+          onClick={() => router.push(`/htmlGenerator/?title=${title}`)}
           style={{ backgroundColor: 'rgb(163, 152, 195)', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
         >
           Вернуться к генерации

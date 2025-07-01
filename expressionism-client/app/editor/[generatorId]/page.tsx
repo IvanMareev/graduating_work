@@ -70,7 +70,6 @@ const pageStyles = sva({
             },
         },
         results: { gridArea: "results", display: "flex", flexDir: "column", gap: 2 },
-        // variants: { gridArea: "variants", display: "flex", flexDir: "column", gap: 1 },
         viewport: {
             gridArea: "viewport",
             bgColor: "slate.6",
@@ -123,7 +122,6 @@ export default function GeneratorEditorPage({ params }: { params: { generatorId:
     }, [data]);
 
     return (
-        // TODO: Вынести стили контейнера в отдельный файл. Либо сам контейнер в отдельный компонент.
         <Container
             display="flex"
             gap={4}

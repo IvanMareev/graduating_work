@@ -62,7 +62,9 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
     const updatedBlockContent = { ...newBlockContent, level };
     setnewBlockContent(updatedBlockContent);
     const res = await createNewContainer(updatedBlockContent);
-    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res?.id ? String(res.id) : 0}`);
+    const searchParams = new URLSearchParams(window.location.search);
+    const title_url = searchParams.get("title") || "Без названия";
+    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res?.id ? String(res.id) : 0}&title=${title_url}`);
     setOpenModal(false);
   };
 
@@ -77,7 +79,7 @@ const BlocksWithIntersectionOptions: React.FC<BlockGroupsProps> = ({ wireframe, 
       >
         <Tab label="Массив элементов второго уровня" />
         <Tab label="Готовые комбинации" />
-        
+
       </Tabs>
 
       {tabIndex === 1 && (

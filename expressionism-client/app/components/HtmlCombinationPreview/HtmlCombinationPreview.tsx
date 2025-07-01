@@ -78,10 +78,8 @@ const HtmlCombinationPreview: React.FC<HtmlCombinationPreviewProps> = ({ blocks 
   const allCombinations = Object.entries(sortedBlocks).map(([groupName, groupBlocks], groupIndex) => {
     const prefix = `group-${groupIndex}`;
 
-    // Оборачиваем html каждого блока в контейнер с классом префикса
     const html = `<div class="${prefix}">\n${groupBlocks.map(block => block.html).join('\n')}\n</div>`;
 
-    // Добавляем префикс в css
     const css = prefixCSS(groupBlocks.map(block => block.css_style).join('\n'), prefix);
 
     return {

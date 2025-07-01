@@ -298,20 +298,16 @@ const NodeGraphEditorInner = forwardRef((props: NodeGraphEditorProps, ref) => {
             if (change.type === "remove") {
                 const node = getNode(change.id);
 
-                // if the node can be removed, keep the change, otherwise we skip the change and keep the node
                 if (node?.type !== "result") {
                     return [...acc, change];
                 }
 
-                // change is skipped, node is kept
                 return acc;
             }
 
-            // all other change types are just put into the next changes arr
             return [...acc, change];
         }, [] as NodeChange[]);
 
-        // apply the changes we kept
         onNodesChange(nextChanges);
     }
 

@@ -1,3 +1,5 @@
-﻿*.code-workspace
+﻿
+*.code-workspace
 expressionism-server/static/*.pdf
 expressionism-server/static/texput.fls
+.idea

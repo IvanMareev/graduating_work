@@ -42,6 +42,8 @@ type BlockGroupListProps = {
 
 const BlockGroupList: React.FC<BlockGroupListProps> = ({ wireframe, level }) => {
   const router = useRouter();
+  const searchParams = new URLSearchParams(window.location.search);
+  const title_url = searchParams.get("title") || "Без названия";
 
   return (
     <Box display="flex" flexDirection="column" gap={4}>
@@ -83,7 +85,7 @@ const BlockGroupList: React.FC<BlockGroupListProps> = ({ wireframe, level }) => 
                                 variant="outlined"
                                 sx={{ ml: 2 }}
                                 onClick={() =>
-                                  router.push(`/HtmlCssEditorPreview/${level}/${block.id}/`)
+                                  router.push(`/HtmlCssEditorPreview/${level}/${block.id}/?title=${title_url}`)
                                 }
                               >
                                 Редактировать вариант

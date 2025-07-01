@@ -62,6 +62,8 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
   const [previewBlock, setPreviewBlock] = useState<Block | null>(null);
   const [sortedblocks, setSortedblocks] = useState<[string, Block[]][]>({});
+  const searchParams = new URLSearchParams(window.location.search);
+  const title_url = searchParams.get("title") || "Без названия";
 
   const handleOpenAddModal = (groupName: string) => {
     setSelectedGroup(groupName);
@@ -80,7 +82,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
       level: level,
     };
     const res = await createNewContainer(updatedBlockContent);
-    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${newBlockContent["template_lvl_id"] || 1}&name=${res.name}`);
+    router.push(`/HtmlCssEditorPreview/${level}/0?BlockID=${res.id}&templateId=${newBlockContent["template_lvl_id"] || 1}&name=${res.name}&title=${title_url}`);
     handleCloseAddModal();
   };
 
@@ -483,7 +485,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
               onClick={() => {
                 router.push(
                   `/HtmlCssEditorPreview/${level}/0?BlockID=${sortedblocks[selectedGroup || ""]?.[0]?.lvl_id || 0
-                  }&templateId=1`
+                  }&templateId=1&title=${title_url}`
                 );
                 setSelectedGroup(null);
               }}
@@ -511,7 +513,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push(
-                          `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}`
+                          `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}&title=${title_url}`
                         );
                       }}
                     >
@@ -563,7 +565,7 @@ const BlockList: React.FC<BlockListProps> = ({ blocks, level, ReqAgainBlock }) =
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(
-                              `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}`
+                              `/HtmlCssEditorPreview/${level}/${block.id}/?name=${block.name}&title=${title_url}`
                             );
                           }}
                         >

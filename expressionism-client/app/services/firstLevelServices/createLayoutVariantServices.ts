@@ -65,8 +65,8 @@ export default async function createLayoutVariantServices(
     const layoutResponse = await axios.post<LayoutVariantType>(
       `${API_BASE_URL}${endpoint.layout_variant}`,
       {
-        ...data,                         // передаем остальные данные
-        template_lvl_id: template_lvl_id // передаем полученный id
+        ...data,                         
+        template_lvl_id: template_lvl_id 
       },
       {
         headers: {

@@ -105,10 +105,8 @@ const Tab = React.forwardRef<HTMLLIElement | null, TabProps>(({ onSubmit, ...pro
     let hitEscape = false;
 
     const handleClick = (e: any) => {
-        // On single click
         if (e.detail === 1 && !props.selected) props.onClick?.();
 
-        // On double click
         if (e.detail === 2) {
             if (isEditing) {
                 return;

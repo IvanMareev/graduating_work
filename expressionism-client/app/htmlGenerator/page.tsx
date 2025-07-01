@@ -183,7 +183,7 @@ export default function BasicTabs() {
               ":hover": { backgroundColor: "#0097a7" },
             }}
           >
-            Генерация
+            Начать генеарцию 
           </Button>
           <SaveLayoutDialog
             open={isDialogOpen}
@@ -209,7 +209,7 @@ export default function BasicTabs() {
               ":hover": { backgroundColor: "#0097a7" },
             }}
           >
-            Админка
+           Административная панель
           </Button>
         </Stack>
       </Box>

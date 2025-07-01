@@ -16,9 +16,9 @@ export default async function tokenInfoServices() {
         });
 
         if (response.status === 200) {
-            return response.data; // Типизировано как UserInfo
+            return response.data;
         } else {
-            return false; // Типизировано как false
+            return false;
         }
     } catch (error: any) {
         if (error.status == 401){
@@ -26,6 +26,6 @@ export default async function tokenInfoServices() {
             
         }
         console.error("Ошибка:", error.response?.data || error.message);
-        return false; // Обработка ошибки
+        return false; 
     }
 }

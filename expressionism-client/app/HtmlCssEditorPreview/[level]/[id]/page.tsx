@@ -18,7 +18,8 @@ const HtmlCssEditorPreview: React.FC = () => {
     const [id, setId] = useState<string | null>(null);
     const params = useParams();
     const router = useRouter();
-    const searchParams = useSearchParams();
+    const searchParams = new URLSearchParams(window.location.search);
+    const title_url = searchParams.get("title") || "Без названия";
 
     useEffect(() => {
         const levelParam = Number(params?.level);
@@ -72,7 +73,7 @@ const HtmlCssEditorPreview: React.FC = () => {
             await putLayoutVariantServices(layoutVariant, level);
         }
 
-        router.push('/htmlGenerator');
+        router.push(`/htmlGenerator/?title=${title_url}`);
     };
 
     const improveMarkup = async () => {
@@ -97,7 +98,7 @@ const HtmlCssEditorPreview: React.FC = () => {
                 <h1>Вы создаете вариант верстки для {level}</h1>
             )}
             <div className={styles.buttonContainer}>
-                <Button variant="text" onClick={() => router.push('/htmlGenerator')}>
+                <Button variant="text" onClick={() => router.push(`/htmlGenerator/?title=${title_url}`)}>
                     Не сохранять изменения
                 </Button>
                 <Button variant="contained" onClick={saveLayoutVariant}>
