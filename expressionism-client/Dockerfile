@@ -1,22 +1,22 @@
-FROM node:18
+FROM node:20
 
-# Устанавливаем рабочую директорию
-WORKDIR /expressionism-client
+# Рабочая директория
+WORKDIR /app
 
-# Копируем весь проект внутрь контейнера
-COPY . .
+# Копируем только package.json и yarn.lock (для кэширования)
+COPY package.json yarn.lock ./
 
-# Удаляем package-lock.json, чтобы избежать конфликтов с yarn.lock
-RUN rm -f package-lock.json
-
-# Устанавливаем зависимости
+# Установка зависимостей
 RUN yarn install
 
-# Сборка проекта
-RUN npm run build
+# Копируем остальной код
+COPY . .
+
+# Сборка Next.js проекта
+RUN yarn build
 
 # Открываем порт
-EXPOSE 8000
+EXPOSE 3000
 
-# Запускаем сервер
-CMD ["npx", "http-server", "build", "-p", "8000"]
+# Запуск продакшн-сервера
+CMD ["yarn", "start"]
